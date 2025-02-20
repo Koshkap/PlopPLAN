@@ -1,0 +1,105 @@
+import os
+import json
+from flask import Flask, render_template, request, jsonify
+from openai import OpenAI
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET")
+
+# the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
+# do not change this unless explicitly requested by the user
+openai = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+LESSON_TEMPLATES = {
+    "lesson": {
+        "description": "Create a comprehensive lesson plan with clear learning objectives, activities, and instructional strategies",
+        "subtemplates": {
+            "Standard": ["Traditional Lesson", "Flipped Classroom", "Direct Instruction"],
+            "Interactive": ["Group Work", "Discussion-based", "Hands-on Activities"],
+            "Technology": ["Digital Learning", "Blended Learning", "Online Instruction"],
+            "Special Education": ["Differentiated", "IEP-aligned", "Modified Curriculum"]
+        }
+    },
+    "assessment": {
+        "description": "Generate assessment materials including quizzes, rubrics, and evaluation criteria",
+        "subtemplates": {
+            "Formative": ["Exit Tickets", "Pop Quiz", "Self-Assessment"],
+            "Summative": ["Unit Test", "Final Exam", "Project Rubric"],
+            "Alternative": ["Portfolio", "Performance Task", "Peer Review"],
+            "Standards-Based": ["Common Core", "State Standards", "IB/AP Aligned"]
+        }
+    },
+    "feedback": {
+        "description": "Design student engagement strategies and feedback mechanisms",
+        "subtemplates": {
+            "Individual": ["One-on-One", "Written Feedback", "Progress Reports"],
+            "Group": ["Peer Feedback", "Group Discussion", "Class Reflection"],
+            "Digital": ["Online Forums", "Digital Portfolios", "Learning Analytics"],
+            "Parent Communication": ["Progress Updates", "Conference Guide", "Newsletter"]
+        }
+    },
+    "admin": {
+        "description": "Create administrative documents like curriculum maps, meeting agendas, and progress reports",
+        "subtemplates": {
+            "Planning": ["Curriculum Map", "Unit Planning", "Yearly Overview"],
+            "Meetings": ["Staff Meeting", "PLC Agenda", "Parent Conference"],
+            "Documentation": ["Student Records", "Behavior Log", "Accommodation Plan"],
+            "Reports": ["Progress Report", "Department Review", "Program Evaluation"]
+        }
+    }
+}
+
+@app.route('/')
+def index():
+    return render_template('index.html', templates=LESSON_TEMPLATES)
+
+@app.route('/generate', methods=['POST'])
+def generate_lesson():
+    try:
+        data = request.json
+        template_type = data.get('template')
+        subject = data.get('subject')
+        grade = data.get('grade', '')
+        duration = data.get('duration', '')
+        objectives = data.get('objectives', '')
+        subtemplate = data.get('subtemplate', '')
+
+        prompt = f"""
+        Create a detailed educational plan using the following parameters:
+        Template Type: {LESSON_TEMPLATES[template_type]['description']}
+        {"Subtemplate: " + subtemplate if subtemplate else ""}
+        Subject: {subject}
+        {"Grade Level: " + grade if grade else ""}
+        {"Duration: " + duration if duration else ""}
+        {"Objectives: " + objectives if objectives else ""}
+
+        Please provide the plan in JSON format with the following structure:
+        {{
+            "title": "Title",
+            "overview": "Brief overview",
+            "overview_summary": ["Summary sentence 1", "Summary sentence 2"],
+            "objectives": ["objective1", "objective2"],
+            "objectives_summary": ["Summary sentence 1", "Summary sentence 2"],
+            "materials": ["material1", "material2"],
+            "materials_summary": ["Summary sentence 1", "Summary sentence 2"],
+            "procedure": ["step1", "step2"],
+            "procedure_summary": ["Summary sentence 1", "Summary sentence 2"],
+            "assessment": "Assessment details",
+            "assessment_summary": ["Summary sentence 1", "Summary sentence 2"],
+            "extensions": ["extension1", "extension2"],
+            "extensions_summary": ["Summary sentence 1", "Summary sentence 2"]
+        }}
+        """
+
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
+        )
+
+        return jsonify(json.loads(response.choices[0].message.content))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
