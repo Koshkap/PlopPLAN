@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize modals
     const templateModalEl = document.getElementById('templateModal');
-    const templateModal = new bootstrap.Modal(templateModalEl, {
-        backdrop: 'static'
-    });
+    const templateModal = new bootstrap.Modal(templateModalEl);
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
+    
+    // Get templates data
+    const templatesData = JSON.parse(templateModalEl.getAttribute('data-templates') || '{}');
     templateModal.show();
 
     // Template variables
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update subtemplates based on selected template
     function updateSubtemplates(template) {
-        const templatesData = JSON.parse(document.getElementById('templateModal').dataset.templates || '{}');
+        const templatesData = JSON.parse(document.getElementById('templateModal').getAttribute('data-templates') || '{}');
         const subtemplates = templatesData[template]?.subtemplates || {};
 
         subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
