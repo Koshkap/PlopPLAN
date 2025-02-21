@@ -15,14 +15,14 @@ LESSON_TEMPLATES = {
         "description": "Create comprehensive lesson plans with clear objectives, activities, and methods",
         "subtemplates": {
             "Basic Frameworks": [
-                "Lesson Seed",
                 "5 E's Lesson Plan",
-                "SPARK Lesson",
-                "Horizontal Lesson Planner"
+                "Lesson Seed",
+                "Horizontal Lesson Planner",
+                "SPARK Lesson"
             ],
             "Learning Approaches": [
-                "Project Based Learning (PBL)",
                 "Student-Centered Approach",
+                "Project Based Learning (PBL)",
                 "Team Based Activity",
                 "Universal Design for Learning"
             ],
@@ -45,9 +45,9 @@ LESSON_TEMPLATES = {
         "subtemplates": {
             "Question Types": [
                 "Multiple Choice Questions",
-                "True/False Questions",
+                "Word Problems",
                 "Fill In The Blank",
-                "Word Problems"
+                "True/False Questions"
             ],
             "Evaluation Tools": [
                 "Analytic Rubric",
