@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
             updateSubtemplates(selectedTemplate);
 
-            // Force close the modal
-            templateModal.hide();
+            // Properly close the modal
+            bootstrap.Modal.getInstance(document.getElementById('templateModal')).hide();
         });
     });
 
