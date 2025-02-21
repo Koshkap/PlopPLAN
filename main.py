@@ -12,39 +12,119 @@ openai = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 LESSON_TEMPLATES = {
     "lesson": {
-        "description": "Create a comprehensive lesson plan with clear learning objectives, activities, and instructional strategies",
+        "description": "Create comprehensive lesson plans with clear objectives, activities, and methods",
         "subtemplates": {
-            "Standard": ["Traditional Lesson", "Flipped Classroom", "Direct Instruction"],
-            "Interactive": ["Group Work", "Discussion-based", "Hands-on Activities"],
-            "Technology": ["Digital Learning", "Blended Learning", "Online Instruction"],
-            "Special Education": ["Differentiated", "IEP-aligned", "Modified Curriculum"]
+            "Basic Frameworks": [
+                "Lesson Seed",
+                "5 E's Lesson Plan",
+                "SPARK Lesson",
+                "Horizontal Lesson Planner"
+            ],
+            "Learning Approaches": [
+                "Project Based Learning (PBL)",
+                "Student-Centered Approach",
+                "Team Based Activity",
+                "Universal Design for Learning"
+            ],
+            "Content Organization": [
+                "Unit Plan",
+                "Book Summary",
+                "Vocabulary List",
+                "Notes Outline"
+            ],
+            "Special Focus": [
+                "STEM Project",
+                "Technology Integration",
+                "Lab + Material List",
+                "Learning Situations"
+            ]
         }
     },
     "assessment": {
-        "description": "Generate assessment materials including quizzes, rubrics, and evaluation criteria",
+        "description": "Generate assessment materials, rubrics, and evaluation tools",
         "subtemplates": {
-            "Formative": ["Exit Tickets", "Pop Quiz", "Self-Assessment"],
-            "Summative": ["Unit Test", "Final Exam", "Project Rubric"],
-            "Alternative": ["Portfolio", "Performance Task", "Peer Review"],
-            "Standards-Based": ["Common Core", "State Standards", "IB/AP Aligned"]
+            "Question Types": [
+                "Multiple Choice Questions",
+                "True/False Questions",
+                "Fill In The Blank",
+                "Word Problems"
+            ],
+            "Evaluation Tools": [
+                "Analytic Rubric",
+                "Holistic Rubric",
+                "Assessment Outline",
+                "Evidence Statements"
+            ],
+            "Assignments": [
+                "Complex Learning Activity",
+                "Portfolio Assignment",
+                "Research Project",
+                "Problem Set"
+            ],
+            "Assessment Methods": [
+                "Exit Slip",
+                "Journal Log",
+                "Oral Exam",
+                "Project-Based Assessment"
+            ]
         }
     },
     "feedback": {
-        "description": "Design student engagement strategies and feedback mechanisms",
+        "description": "Design engaging activities and feedback mechanisms",
         "subtemplates": {
-            "Individual": ["One-on-One", "Written Feedback", "Progress Reports"],
-            "Group": ["Peer Feedback", "Group Discussion", "Class Reflection"],
-            "Digital": ["Online Forums", "Digital Portfolios", "Learning Analytics"],
-            "Parent Communication": ["Progress Updates", "Conference Guide", "Newsletter"]
+            "Interactive Activities": [
+                "Think-Pair-Share",
+                "Jigsaw Activity",
+                "Round Robin",
+                "4 Corners"
+            ],
+            "Learning Games": [
+                "Bingo Style",
+                "Jeopardy Style",
+                "Quiz Quiz Trade",
+                "Escape Room"
+            ],
+            "Engagement Tools": [
+                "Class Poll",
+                "Self-Assessment",
+                "Reflective Journaling",
+                "Mad Lib"
+            ],
+            "Social Learning": [
+                "Team Building Activity",
+                "S.E.L. Activity",
+                "Mindfulness Activity",
+                "Conversation Practice"
+            ]
         }
     },
     "admin": {
-        "description": "Create administrative documents like curriculum maps, meeting agendas, and progress reports",
+        "description": "Create administrative documents and communication materials",
         "subtemplates": {
-            "Planning": ["Curriculum Map", "Unit Planning", "Yearly Overview"],
-            "Meetings": ["Staff Meeting", "PLC Agenda", "Parent Conference"],
-            "Documentation": ["Student Records", "Behavior Log", "Accommodation Plan"],
-            "Reports": ["Progress Report", "Department Review", "Program Evaluation"]
+            "Planning": [
+                "Syllabus Starter",
+                "Substitute Planner",
+                "Action Steps",
+                "IEP Outline"
+            ],
+            "Communication": [
+                "Parent Communication",
+                "Class Announcement",
+                "Newsletter Outline",
+                "Email Outline"
+            ],
+            "Documentation": [
+                "Student Update",
+                "Report Card Comments",
+                "Evidence-Based Intervention",
+                "Behavioral Intervention Plan"
+            ],
+            "Professional": [
+                "Letter of Recommendation",
+                "Observation Suggestions",
+                "S.M.A.R.T. Goal Outline",
+                "School Improvement Project"
+            ]
         }
     }
 }
