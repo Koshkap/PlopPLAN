@@ -22,9 +22,14 @@
                         {% for template_key, template in templates.items() %}
                         <div class="col-md-6 mb-3">
                             <div class="template-card" data-template="{{ template_key }}" data-subtemplates='{{ template.subtemplates|tojson }}'>
-                                <i class="fas fa-book-open"></i>
-                                <h4>{{ template_key|title }}</h4>
-                                <p>{{ template.description }}</p>
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <h4>{{ template_key|title }}</h4>
+                                    <i class="fas fa-info-circle text-primary" 
+                                       data-bs-toggle="tooltip" 
+                                       data-bs-placement="top" 
+                                       title="{{ template.description }}"></i>
+                                </div>
+                                <i class="fas fa-book-open mb-2"></i>
                             </div>
                         </div>
                         {% endfor %}
@@ -149,9 +154,9 @@
                             </div>
                         </div>
                         <div id="lessonPlanOutput" class="lesson-output">
-                            <div class="text-center text-muted py-5">
-                                <i class="fas fa-lightbulb fa-3x mb-3"></i>
-                                <p>Your generated plan will appear here</p>
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-lightbulb fa-2x mb-2"></i>
+                                <p>Your lesson plan will appear here</p>
                             </div>
                         </div>
                     </div>

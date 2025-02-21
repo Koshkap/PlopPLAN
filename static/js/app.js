@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
     // Initialize modals
     const templateModalEl = document.getElementById('templateModal');
     const templateModal = new bootstrap.Modal(templateModalEl);
@@ -94,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add click handlers to subtemplate items
         document.querySelectorAll('.subtemplate-item').forEach(item => {
             item.addEventListener('click', function() {
-                document.querySelectorAll('.subtemplate-item').forEach(i => 
+                document.querySelectorAll('.subtemplate-item').forEach(i =>
                     i.classList.remove('selected'));
 
                 this.classList.add('selected');
@@ -238,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="section-header" onclick="this.nextElementSibling.classList.toggle('expanded')">
                     <h4>${title}</h4>
                     <div class="section-summary">
-                        ${Array.isArray(summary) ? summary.map(s => `<p>${s}</p>`).join('') : ''}
+                        ${Array.isArray(summary) ? `<p>${summary[0]}</p>` : ''}
                     </div>
                 </div>
                 <div class="section-content">
