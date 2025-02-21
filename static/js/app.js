@@ -45,13 +45,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Template selection
     templateCards.forEach(card => {
-        card.addEventListener('click', function() {
-            selectedTemplate = this.dataset.template;
+        card.addEventListener('click', () => {
+            selectedTemplate = card.dataset.template;
             templateCards.forEach(c => c.classList.remove('selected'));
-            this.classList.add('selected');
-            selectedTemplateDisplay.textContent = this.querySelector('h4').textContent;
+            card.classList.add('selected');
+            selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
             updateSubtemplates(selectedTemplate);
-            templateModal.hide();
+
+            // Force close the modal
+            const modalElement = document.getElementById('templateModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
         });
     });
 
