@@ -53,11 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateSubtemplates(selectedTemplate);
 
             // Force close the modal
-            const modalElement = document.getElementById('templateModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
+            templateModal.hide();
         });
     });
 
