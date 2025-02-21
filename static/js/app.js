@@ -1,9 +1,63 @@
 const SUBTEMPLATE_DESCRIPTIONS = {
+    // Basic Frameworks
     "5 E's Lesson Plan": "Engage, Explore, Explain, Elaborate, and Evaluate framework for inquiry-based learning",
+    "Lesson Seed": "Basic lesson structure with essential components and flexible adaptation options",
+    "Horizontal Lesson Planner": "Timeline-based lesson organization with clear progression of activities",
     "SPARK Lesson": "Structured, Progressive, Active, Reflective, Knowledge-based approach to lesson design",
+    
+    // Learning Approaches
     "Student-Centered Approach": "Focuses on active learning and student engagement through collaborative activities",
     "Project Based Learning": "Long-term learning through complex, authentic projects and real-world challenges",
-    // Add more descriptions as needed
+    "Team Based Activity": "Collaborative learning experiences that promote cooperation and communication",
+    "Universal Design for Learning": "Inclusive teaching approach accommodating diverse learning styles and needs",
+    
+    // Content Organization
+    "Unit Plan": "Comprehensive overview of connected lessons and learning objectives",
+    "Book Summary": "Structured outline for literature analysis and key concepts",
+    "Vocabulary List": "Organized collection of key terms with definitions and usage examples",
+    "Notes Outline": "Hierarchical organization of lesson content and key points",
+    
+    // Special Focus
+    "STEM Project": "Integrated science, technology, engineering, and math activities",
+    "Technology Integration": "Strategic incorporation of digital tools and resources",
+    "Lab + Material List": "Detailed preparation guide for hands-on experimental activities",
+    "Learning Situations": "Context-rich scenarios for authentic learning experiences",
+    
+    // Question Types
+    "Multiple Choice Questions": "Traditional format testing with options for varied difficulty levels",
+    "Word Problems": "Application-based questions requiring problem-solving skills",
+    "Fill In The Blank": "Completion-style questions focusing on key concepts",
+    "True/False Questions": "Quick assessment of factual understanding",
+    
+    // Evaluation Tools
+    "Analytic Rubric": "Detailed scoring guide with specific criteria and performance levels",
+    "Holistic Rubric": "Overall assessment tool with comprehensive performance descriptions",
+    "Assessment Outline": "Framework for evaluating student learning and progress",
+    "Evidence Statements": "Clear indicators of student understanding and achievement",
+    
+    // Interactive Activities
+    "Think-Pair-Share": "Structured discussion method promoting individual and collaborative learning",
+    "Jigsaw Activity": "Cooperative learning strategy where students become experts on content",
+    "Round Robin": "Group activity format ensuring equal participation from all students",
+    "4 Corners": "Movement-based activity for expressing opinions and discussing topics",
+    
+    // Learning Games
+    "Bingo Style": "Engaging review game format using recognition and recall",
+    "Jeopardy Style": "Competitive question-and-answer game for content review",
+    "Quiz Quiz Trade": "Active learning strategy combining movement and peer review",
+    "Escape Room": "Problem-solving adventure with curriculum-based challenges",
+    
+    // Engagement Tools
+    "Class Poll": "Quick feedback tool for gathering student opinions and understanding",
+    "Self-Assessment": "Reflective tool for students to evaluate their own learning",
+    "Reflective Journaling": "Written reflection on learning experiences and progress",
+    "Mad Lib": "Creative writing activity with parts of speech practice",
+    
+    // Social Learning
+    "Team Building Activity": "Exercises designed to improve group dynamics and cooperation",
+    "S.E.L. Activity": "Social-emotional learning experiences for personal growth",
+    "Mindfulness Activity": "Exercises promoting focus and emotional awareness",
+    "Conversation Practice": "Structured dialogue activities for language and communication skills"
 };
 
 document.addEventListener('DOMContentLoaded', function() {
