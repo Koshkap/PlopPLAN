@@ -124,6 +124,15 @@ body {
     font-weight: 500;
 }
 
+.card-title {
+    cursor: pointer;
+}
+
+.card-title .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+
 /* Resource Items */
 .resource-item {
     padding: 0.75rem;

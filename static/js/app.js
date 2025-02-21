@@ -192,6 +192,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Load history from localStorage
+    // Toggle arrow rotation
+    document.querySelector('.card-title').addEventListener('click', function() {
+        const arrow = this.querySelector('.fa-chevron-down');
+        const output = document.getElementById('lessonPlanOutput');
+        
+        if (output.style.display === 'none') {
+            output.style.display = 'block';
+            arrow.style.transform = 'rotate(0deg)';
+        } else {
+            output.style.display = 'none';
+            arrow.style.transform = 'rotate(-90deg)';
+        }
+    });
+
     const loadHistory = () => {
         const history = JSON.parse(localStorage.getItem('lessonHistory') || '[]');
         const historyContainer = document.getElementById('lessonHistory');
