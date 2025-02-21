@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize modals
-    const templateModal = new bootstrap.Modal(document.getElementById('templateModal'), {
+    const templateModalEl = document.getElementById('templateModal');
+    const templateModal = new bootstrap.Modal(templateModalEl, {
         backdrop: 'static'
     });
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
@@ -51,9 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             card.classList.add('selected');
             selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
             updateSubtemplates(selectedTemplate);
-
-            // Properly close the modal
-            bootstrap.Modal.getInstance(document.getElementById('templateModal')).hide();
+            templateModal.hide();
         });
     });
 
