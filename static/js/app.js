@@ -375,7 +375,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
-        modal.hide();
+        if (modal) {
+            modal.hide();
+        } else {
+            document.getElementById('personalizationModal').classList.remove('show');
+            document.body.classList.remove('modal-open');
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.remove();
+            }
+        }
     });
 
     // Load saved preferences on page load
