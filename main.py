@@ -161,17 +161,17 @@ def generate_lesson():
         {{
             "title": "Title",
             "overview": "Brief overview",
-            "overview_summary": ["Key overview point"],
+            "overview_summary": ["Summary sentence 1", "Summary sentence 2"],
             "objectives": ["objective1", "objective2"],
-            "objectives_summary": ["Key objectives summary"],
+            "objectives_summary": ["Summary sentence 1", "Summary sentence 2"],
             "materials": ["material1", "material2"],
-            "materials_summary": ["Key materials summary"],
+            "materials_summary": ["Summary sentence 1", "Summary sentence 2"],
             "procedure": ["step1", "step2"],
-            "procedure_summary": ["Key procedure summary"],
+            "procedure_summary": ["Summary sentence 1", "Summary sentence 2"],
             "assessment": "Assessment details",
-            "assessment_summary": ["Key assessment summary"],
+            "assessment_summary": ["Summary sentence 1", "Summary sentence 2"],
             "extensions": ["extension1", "extension2"],
-            "extensions_summary": ["Key extension summary"]
+            "extensions_summary": ["Summary sentence 1", "Summary sentence 2"]
         }}
         """
 
