@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             templateCards.forEach(c => c.classList.remove('selected'));
             this.classList.add('selected');
             selectedTemplateDisplay.textContent = this.querySelector('h4').textContent;
-            
+
             document.getElementById('templateModal').dataset.bsBackdrop = 'true';
             templateModal.hide();
         });
@@ -104,9 +104,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedSubtemplate = document.getElementById('selectedSubtemplate');
     let currentSubtemplate = '';
 
-    // Toggle subtemplate dropdown
-    subtemplateSelector.addEventListener('click', function() {
-        subtemplateContent.classList.toggle('active');
+    // Improve subtemplate dropdown behavior
+    subtemplateSelector.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isActive = subtemplateContent.classList.contains('active');
+
+        // Close all other dropdowns first
+        document.querySelectorAll('.subtemplate-content').forEach(content => 
+            content.classList.remove('active'));
+
+        if (!isActive) {
+            subtemplateContent.classList.add('active');
+        }
     });
 
     // Close subtemplate dropdown when clicking outside
@@ -118,8 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update subtemplates based on selected template
     function updateSubtemplates(template) {
-        const templates = JSON.parse(document.getElementById('templateModal').dataset.templates || '{}');
-        const subtemplates = templates[template]?.subtemplates || {};
+        const templatesData = JSON.parse(document.getElementById('templateModal').dataset.templates || '{}');
+        const subtemplates = templatesData[template]?.subtemplates || {};
 
         subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
             <div class="subtemplate-category">
@@ -132,8 +141,22 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `).join('');
 
+        // Remove any existing selected class
+        const previousSelected = subtemplateContent.querySelector('.selected');
+        if (previousSelected) {
+            previousSelected.classList.remove('selected');
+        }
+
+        // Add click handlers to subtemplate items
         document.querySelectorAll('.subtemplate-item').forEach(item => {
             item.addEventListener('click', function() {
+                // Remove selected class from all items
+                document.querySelectorAll('.subtemplate-item').forEach(i => 
+                    i.classList.remove('selected'));
+
+                // Add selected class to clicked item
+                this.classList.add('selected');
+
                 currentSubtemplate = this.dataset.subtemplate;
                 selectedSubtemplate.textContent = currentSubtemplate;
                 subtemplateContent.classList.remove('active');
@@ -141,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Update subtemplates when template changes
+    // Update templates when template changes
     templateCards.forEach(card => {
         card.addEventListener('click', function() {
             selectedTemplate = this.dataset.template;
@@ -150,6 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedSubtemplate.textContent = 'Select a subtemplate...';
         });
     });
+
 
     // Form submission
     lessonForm.addEventListener('submit', async function(e) {

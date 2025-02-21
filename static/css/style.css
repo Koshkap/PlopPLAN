@@ -96,14 +96,26 @@ body {
 }
 
 .subtemplate-item {
-    padding: 0.5rem;
+    padding: 0.75rem;
     cursor: pointer;
     border-radius: 4px;
     transition: background-color var(--transition-speed);
+    font-size: 0.9rem;
 }
 
 .subtemplate-item:hover {
     background-color: var(--primary-light);
+}
+
+.subtemplate-item.selected {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+#subtemplateSelector {
+    cursor: pointer;
+    user-select: none;
 }
 
 /* Template Selection Modal */
@@ -180,10 +192,16 @@ body {
     background-color: #e9ecef;
 }
 
+/* Section Summary styles */
 .section-summary {
     color: #666;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    line-height: 1.2;
+}
+
+.section-summary p {
+    margin-bottom: 0.25rem;
 }
 
 .section-content {
