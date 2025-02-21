@@ -387,18 +387,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('[name="grade"]').value = preferences.grade;
         document.querySelector('[name="duration"]').value = preferences.duration;
 
-        // Close modal
-        const modalElement = document.getElementById('personalizationModal');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) {
-            modal.hide();
-        }
-        modalElement.classList.remove('show');
-        document.body.classList.remove('modal-open');
-        const modalBackdrop = document.querySelector('.modal-backdrop');
-        if (modalBackdrop) {
-            modalBackdrop.remove();
-        }
+        // Close modal using Bootstrap's modal instance
+        const personalizationModal = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
+        personalizationModal.hide();
     });
 
     // Load saved preferences on page load
