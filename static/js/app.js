@@ -51,8 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('selected');
             selectedTemplateDisplay.textContent = this.querySelector('h4').textContent;
             updateSubtemplates(selectedTemplate);
-
-            document.getElementById('templateModal').dataset.bsBackdrop = 'true';
             templateModal.hide();
         });
     });
@@ -182,17 +180,10 @@ document.addEventListener('DOMContentLoaded', function() {
             template: selectedTemplate,
             subtemplate: currentSubtemplate,
             subject: this.elements.subject.value,
-            grade: '',
-            duration: '',
-            objectives: ''
+            grade: this.elements.grade?.value || '',
+            duration: this.elements.duration?.value || '',
+            objectives: this.elements.objectives?.value || ''
         };
-
-        // Only add advanced fields if they're visible
-        if (!advancedFields.classList.contains('d-none')) {
-            formData.grade = this.elements.grade.value;
-            formData.duration = this.elements.duration.value;
-            formData.objectives = this.elements.objectives.value;
-        }
 
         try {
             const response = await fetch('/generate', {
@@ -204,12 +195,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to generate plan. Please try again.');
+                throw new Error('Failed to generate plan');
             }
 
             const data = await response.json();
             displayLessonPlan(data);
             saveToHistory(data, formData);
+
         } catch (error) {
             lessonOutput.innerHTML = `
                 <div class="alert alert-danger">
@@ -221,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset button state
             submitBtn.disabled = false;
             spinner.classList.add('d-none');
-            submitBtn.innerHTML = originalBtnText;
+            submitBtn.textContent = originalBtnText;
         }
     });
 
