@@ -229,14 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
 
-    // Toggle advanced options
-    toggleAdvancedBtn.addEventListener('click', function() {
-        const isHidden = advancedFields.classList.contains('d-none');
-        advancedFields.classList.toggle('d-none');
-        this.innerHTML = isHidden ?
-            '<i class="fas fa-caret-up"></i> Show Less Options' :
-            '<i class="fas fa-caret-down"></i> Show More Options';
-    });
+    
 
     // Form submission
     lessonForm.addEventListener('submit', async function(e) {
