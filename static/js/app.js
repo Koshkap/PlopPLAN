@@ -1,13 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Show template modal on page load
+    // Initialize modals
     const templateModal = new bootstrap.Modal(document.getElementById('templateModal'), {
-        backdrop: 'static'  // Initially static
+        backdrop: 'static'
     });
+    const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
     templateModal.show();
 
+    // Template variables
     let selectedTemplate = '';
+    let currentSubtemplate = '';
+
+    // DOM elements
     const templateCards = document.querySelectorAll('.template-card');
     const selectedTemplateDisplay = document.getElementById('selectedTemplate');
+    const selectedSubtemplateDisplay = document.getElementById('selectedSubtemplate');
+    const subtemplateButton = document.getElementById('subtemplateButton');
+    const subtemplateContent = document.getElementById('subtemplateContent');
     const lessonForm = document.getElementById('lessonForm');
     const lessonOutput = document.getElementById('lessonPlanOutput');
     const changeTemplateBtn = document.getElementById('changeTemplate');
@@ -42,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             templateCards.forEach(c => c.classList.remove('selected'));
             this.classList.add('selected');
             selectedTemplateDisplay.textContent = this.querySelector('h4').textContent;
+            updateSubtemplates(selectedTemplate);
 
             document.getElementById('templateModal').dataset.bsBackdrop = 'true';
             templateModal.hide();
@@ -53,14 +62,44 @@ document.addEventListener('DOMContentLoaded', function() {
         templateModal.show();
     });
 
-    // Toggle advanced options
-    toggleAdvancedBtn.addEventListener('click', function() {
-        const isHidden = advancedFields.classList.contains('d-none');
-        advancedFields.classList.toggle('d-none');
-        this.innerHTML = isHidden ?
-            '<i class="fas fa-caret-up"></i> Show Less Options' :
-            '<i class="fas fa-caret-down"></i> Show More Options';
+    // Show subtemplate modal
+    subtemplateButton.addEventListener('click', () => {
+        subtemplateModal.show();
     });
+
+    // Update subtemplates based on selected template
+    function updateSubtemplates(template) {
+        const templatesData = JSON.parse(document.getElementById('templateModal').dataset.templates || '{}');
+        const subtemplates = templatesData[template]?.subtemplates || {};
+
+        subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
+            <div class="subtemplate-category mb-4">
+                <h5 class="mb-3">${category}</h5>
+                <div class="row g-3">
+                    ${items.map(item => `
+                        <div class="col-md-6">
+                            <div class="subtemplate-item" data-subtemplate="${item}">
+                                ${item}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        // Add click handlers to subtemplate items
+        document.querySelectorAll('.subtemplate-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.subtemplate-item').forEach(i => 
+                    i.classList.remove('selected'));
+
+                this.classList.add('selected');
+                currentSubtemplate = this.dataset.subtemplate;
+                selectedSubtemplateDisplay.textContent = currentSubtemplate;
+                subtemplateModal.hide();
+            });
+        });
+    }
 
     // Load history from localStorage
     const loadHistory = () => {
@@ -99,81 +138,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    const subtemplateSelector = document.getElementById('subtemplateSelector');
-    const subtemplateContent = document.getElementById('subtemplateContent');
-    const selectedSubtemplate = document.getElementById('selectedSubtemplate');
-    let currentSubtemplate = '';
 
-    // Improve subtemplate dropdown behavior
-    subtemplateSelector.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const isActive = subtemplateContent.classList.contains('active');
-
-        // Close all other dropdowns first
-        document.querySelectorAll('.subtemplate-content').forEach(content => 
-            content.classList.remove('active'));
-
-        if (!isActive) {
-            subtemplateContent.classList.add('active');
-        }
+    // Toggle advanced options
+    toggleAdvancedBtn.addEventListener('click', function() {
+        const isHidden = advancedFields.classList.contains('d-none');
+        advancedFields.classList.toggle('d-none');
+        this.innerHTML = isHidden ?
+            '<i class="fas fa-caret-up"></i> Show Less Options' :
+            '<i class="fas fa-caret-down"></i> Show More Options';
     });
-
-    // Close subtemplate dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!subtemplateSelector.contains(e.target) && !subtemplateContent.contains(e.target)) {
-            subtemplateContent.classList.remove('active');
-        }
-    });
-
-    // Update subtemplates based on selected template
-    function updateSubtemplates(template) {
-        const templatesData = JSON.parse(document.getElementById('templateModal').dataset.templates || '{}');
-        const subtemplates = templatesData[template]?.subtemplates || {};
-
-        subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
-            <div class="subtemplate-category">
-                <h5>${category}</h5>
-                ${items.map(item => `
-                    <div class="subtemplate-item" data-subtemplate="${item}">
-                        ${item}
-                    </div>
-                `).join('')}
-            </div>
-        `).join('');
-
-        // Remove any existing selected class
-        const previousSelected = subtemplateContent.querySelector('.selected');
-        if (previousSelected) {
-            previousSelected.classList.remove('selected');
-        }
-
-        // Add click handlers to subtemplate items
-        document.querySelectorAll('.subtemplate-item').forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove selected class from all items
-                document.querySelectorAll('.subtemplate-item').forEach(i => 
-                    i.classList.remove('selected'));
-
-                // Add selected class to clicked item
-                this.classList.add('selected');
-
-                currentSubtemplate = this.dataset.subtemplate;
-                selectedSubtemplate.textContent = currentSubtemplate;
-                subtemplateContent.classList.remove('active');
-            });
-        });
-    }
-
-    // Update templates when template changes
-    templateCards.forEach(card => {
-        card.addEventListener('click', function() {
-            selectedTemplate = this.dataset.template;
-            updateSubtemplates(selectedTemplate);
-            currentSubtemplate = '';
-            selectedSubtemplate.textContent = 'Select a subtemplate...';
-        });
-    });
-
 
     // Form submission
     lessonForm.addEventListener('submit', async function(e) {
