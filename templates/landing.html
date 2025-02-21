@@ -10,23 +10,48 @@
 </head>
 <body class="landing-page">
     <!-- Hero Section -->
-    <header class="hero py-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-3">Create Professional Lesson Plans in Minutes</h1>
-                    <p class="lead mb-4">AI-powered assistant that helps educators create comprehensive, engaging lesson plans tailored to their needs. Try it free during our development phase.</p>
-                    <div class="cta-group">
-                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg mb-2 me-2">Try Demo Free</a>
-                        <p class="text-muted small">No credit card required during beta</p>
-                    </div>
+<header class="hero py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">Create Professional Lesson Plans in Minutes</h1>
+                <p class="lead mb-4">AI-powered assistant that helps educators create comprehensive, engaging lesson plans tailored to their needs.</p>
+                <div class="cta-group">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg mb-2 me-2">Try Demo Free</a>
+                    <p class="text-muted small">No credit card required during beta</p>
                 </div>
-                <div class="col-lg-6">
-                    <img src="{{ url_for('static', filename='img/hero-image.svg') }}" alt="AI Lesson Planner Interface" class="img-fluid">
+            </div>
+            <div class="col-lg-6">
+                <!-- Editor Preview -->
+                <div class="editor-preview shadow-lg rounded-3 bg-white p-4">
+                    <div class="mock-header d-flex align-items-center mb-4">
+                        <div class="mock-icon me-3">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Sample Lesson Plan</h5>
+                            <p class="text-muted small mb-0">Science - Grade 5</p>
+                        </div>
+                    </div>
+                    <div class="mock-content">
+                        <div class="mock-section mb-3">
+                            <h6 class="mock-title">Overview</h6>
+                            <div class="mock-text"></div>
+                        </div>
+                        <div class="mock-section mb-3">
+                            <h6 class="mock-title">Objectives</h6>
+                            <div class="mock-list"></div>
+                        </div>
+                        <div class="mock-section">
+                            <h6 class="mock-title">Activities</h6>
+                            <div class="mock-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
     <!-- Features Section -->
     <section class="features py-5 bg-light">

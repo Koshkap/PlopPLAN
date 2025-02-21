@@ -185,5 +185,25 @@ def generate_lesson():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/generate_resources', methods=['POST'])
+def generate_resources():
+    try:
+        data = request.json
+        prompt = data.get('prompt', '')
+
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[{
+                "role": "user",
+                "content": f"{prompt}\nRespond in JSON format with two arrays: 'videos' and 'worksheets'"
+            }],
+            response_format={"type": "json_object"}
+        )
+
+        resources = json.loads(response.choices[0].message.content)
+        return jsonify(resources)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

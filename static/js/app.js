@@ -1,3 +1,11 @@
+const SUBTEMPLATE_DESCRIPTIONS = {
+    "5 E's Lesson Plan": "Engage, Explore, Explain, Elaborate, and Evaluate framework for inquiry-based learning",
+    "SPARK Lesson": "Structured, Progressive, Active, Reflective, Knowledge-based approach to lesson design",
+    "Student-Centered Approach": "Focuses on active learning and student engagement through collaborative activities",
+    "Project Based Learning": "Long-term learning through complex, authentic projects and real-world challenges",
+    // Add more descriptions as needed
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -9,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const templateModalEl = document.getElementById('templateModal');
     const templateModal = new bootstrap.Modal(templateModalEl);
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
+    const personalizationModal = new bootstrap.Modal(document.getElementById('personalizationModal'));
 
     // Get templates data from global variable
     const templatesData = window.TEMPLATES_DATA || {};
@@ -32,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('historySidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const closeSidebar = document.getElementById('closeSidebar');
+    const personalizationForm = document.getElementById('personalizationForm');
+
 
     // Sidebar Toggle
     sidebarToggle.addEventListener('click', () => {
@@ -89,7 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${items.map(item => `
                         <div class="col-md-6">
                             <div class="subtemplate-item" data-subtemplate="${item}">
-                                ${item}
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <span>${item}</span>
+                                    <i class="fas fa-info-circle text-primary" 
+                                       data-bs-toggle="tooltip" 
+                                       data-bs-placement="top" 
+                                       title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
+                                </div>
                             </div>
                         </div>
                     `).join('')}
@@ -97,18 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `).join('');
 
-        // Add click handlers to subtemplate items
-        document.querySelectorAll('.subtemplate-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.subtemplate-item').forEach(i =>
-                    i.classList.remove('selected'));
-
-                this.classList.add('selected');
-                currentSubtemplate = this.dataset.subtemplate;
-                selectedSubtemplateDisplay.textContent = currentSubtemplate;
-                subtemplateModal.hide();
-            });
-        });
+        // Initialize tooltips for new content
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
     }
 
     // Load history from localStorage
@@ -254,35 +262,72 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         const html = `
-            <h2 class="mb-4">${data.title || 'Untitled Plan'}</h2>
+            <h3 class="mb-4">${data.title || 'Untitled Plan'}</h3>
             ${createSection('Overview',
                 `<p>${data.overview || 'No overview provided'}</p>`,
                 data.overview_summary)}
-
             ${createSection('Objectives',
                 `<ul>${(data.objectives || []).map(obj => `<li>${obj}</li>`).join('')}</ul>`,
                 data.objectives_summary)}
-
             ${createSection('Materials',
                 `<ul>${(data.materials || []).map(mat => `<li>${mat}</li>`).join('')}</ul>`,
                 data.materials_summary)}
-
             ${createSection('Procedure',
                 `<ol>${(data.procedure || []).map(step => `<li>${step}</li>`).join('')}</ol>`,
                 data.procedure_summary)}
-
             ${createSection('Assessment',
                 `<p>${data.assessment || 'No assessment provided'}</p>`,
                 data.assessment_summary)}
-
             ${createSection('Extensions',
                 `<ul>${(data.extensions || []).map(ext => `<li>${ext}</li>`).join('')}</ul>`,
                 data.extensions_summary)}
         `;
 
         lessonOutput.innerHTML = html;
-        lessonOutput.classList.add('fade-in');
+
+        // Add resources section
+        const resourcesTemplate = document.getElementById('resourcesTemplate').innerHTML;
+        lessonOutput.insertAdjacentHTML('beforeend', resourcesTemplate);
+
+        // Generate resources based on the lesson plan
+        generateResources(data);
     }
+
+    // Add personalization handling
+    personalizationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const preferences = {
+            grade: formData.get('defaultGrade'),
+            duration: formData.get('defaultDuration'),
+            teachingPreferences: formData.get('teachingPreferences')
+        };
+        localStorage.setItem('teacherPreferences', JSON.stringify(preferences));
+
+        // Update form fields with saved preferences
+        document.querySelector('[name="grade"]').value = preferences.grade;
+        document.querySelector('[name="duration"]').value = preferences.duration;
+
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
+        modal.hide();
+    });
+
+    // Load saved preferences on page load
+    const loadSavedPreferences = () => {
+        const preferences = JSON.parse(localStorage.getItem('teacherPreferences') || '{}');
+        if (preferences.grade) {
+            document.querySelector('[name="grade"]').value = preferences.grade;
+        }
+        if (preferences.duration) {
+            document.querySelector('[name="duration"]').value = preferences.duration;
+        }
+    };
+
+
+    // Call loadSavedPreferences on page load
+    loadSavedPreferences();
+
 
     // Export functionality
     document.getElementById('exportPDF').addEventListener('click', function() {
@@ -312,4 +357,44 @@ document.addEventListener('DOMContentLoaded', function() {
         link.download = 'lesson_plan.doc';
         link.click();
     });
+
+    // Add resource generation function
+    async function generateResources(data) {
+        const prompt = `Based on this lesson plan about "${data.title}", suggest:
+        1. Three relevant educational YouTube videos (titles only)
+        2. Three worksheet or material ideas
+        Keep suggestions concise and directly related to the lesson content.`;
+
+        try {
+            const response = await fetch('/generate_resources', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+
+            if (!response.ok) throw new Error('Failed to generate resources');
+
+            const resources = await response.json();
+
+            // Update resources in the UI
+            const videoContainer = document.querySelector('.video-resources');
+            const worksheetContainer = document.querySelector('.worksheet-resources');
+
+            videoContainer.innerHTML = resources.videos.map(video => `
+                <div class="resource-item">
+                    <i class="fas fa-play-circle text-danger me-2"></i>
+                    ${video}
+                </div>
+            `).join('');
+
+            worksheetContainer.innerHTML = resources.worksheets.map(worksheet => `
+                <div class="resource-item">
+                    <i class="fas fa-file-download text-primary me-2"></i>
+                    ${worksheet}
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error generating resources:', error);
+        }
+    }
 });

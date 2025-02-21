@@ -22,14 +22,9 @@
                         {% for template_key, template in templates.items() %}
                         <div class="col-md-6 mb-3">
                             <div class="template-card" data-template="{{ template_key }}" data-subtemplates='{{ template.subtemplates|tojson }}'>
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <h4>{{ template_key|title }}</h4>
-                                    <i class="fas fa-info-circle text-primary" 
-                                       data-bs-toggle="tooltip" 
-                                       data-bs-placement="top" 
-                                       title="{{ template.description }}"></i>
-                                </div>
+                                <h4>{{ template_key|title }}</h4>
                                 <i class="fas fa-book-open mb-2"></i>
+                                <p class="small text-muted">{{ template.description }}</p>
                             </div>
                         </div>
                         {% endfor %}
@@ -39,8 +34,8 @@
         </div>
     </div>
 
-    <!-- Sidebar Toggle Button -->
-    <button class="btn btn-primary sidebar-toggle" id="sidebarToggle">
+    <!-- Sidebar Toggle Button (Fixed Position) -->
+    <button class="btn btn-primary sidebar-toggle position-fixed" id="sidebarToggle" style="right: 20px; bottom: 20px; z-index: 1000;">
         <i class="fas fa-history"></i>
     </button>
 
@@ -79,6 +74,13 @@
                                 </div>
                             </div>
 
+                            <!-- Describe your lesson -->
+                            <div class="mb-3">
+                                <label class="form-label">Describe your lesson</label>
+                                <textarea class="form-control" name="subject" required 
+                                    placeholder="What would you like to teach? Describe your lesson idea or topic..."></textarea>
+                            </div>
+
                             <!-- Subtemplate Button -->
                             <div class="mb-3">
                                 <button type="button" class="btn btn-outline-secondary w-100" id="subtemplateButton" data-bs-toggle="modal" data-bs-target="#subtemplateModal">
@@ -87,12 +89,11 @@
                                 </button>
                             </div>
 
-                            <!-- Basic Fields -->
-                            <div id="basicFields">
-                                <div class="mb-3">
-                                    <label class="form-label">Subject</label>
-                                    <input type="text" class="form-control" name="subject" required>
-                                </div>
+                            <!-- Personalization Button -->
+                            <div class="text-center mb-3">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personalizationModal">
+                                    <i class="fas fa-user-cog"></i> Personalize Your Lessons
+                                </button>
                             </div>
 
                             <!-- Advanced Options Toggle -->
@@ -176,6 +177,71 @@
                 <div class="modal-body">
                     <div id="subtemplateContent">
                         <!-- Subtemplates will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personalization Modal -->
+    <div class="modal fade" id="personalizationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Personalize Your Lessons</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="personalizationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Default Grade Level</label>
+                            <select class="form-select" name="defaultGrade">
+                                <option value="">Select Grade</option>
+                                <option value="K-2">K-2</option>
+                                <option value="3-5">3-5</option>
+                                <option value="6-8">6-8</option>
+                                <option value="9-12">9-12</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Default Lesson Duration (minutes)</label>
+                            <input type="number" class="form-control" name="defaultDuration" min="1" value="45">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teaching Style Preferences</label>
+                            <textarea class="form-control" name="teachingPreferences" rows="3" 
+                                placeholder="Describe your teaching style, preferred activities, or any specific approaches you typically use"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save Preferences</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources Section Template -->
+    <div id="resourcesTemplate" style="display: none;">
+        <div class="resources-section mt-4">
+            <h4>Additional Resources</h4>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fab fa-youtube text-danger"></i> Related Videos
+                            </h5>
+                            <div class="video-resources"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-file-alt text-primary"></i> Worksheets & Materials
+                            </h5>
+                            <div class="worksheet-resources"></div>
+                        </div>
                     </div>
                 </div>
             </div>
