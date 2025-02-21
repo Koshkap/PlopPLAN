@@ -171,6 +171,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize tooltips for new content
         const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+        // Add click handlers for subtemplate items
+        const subtemplateItems = document.querySelectorAll('.subtemplate-item');
+        subtemplateItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove selected class from all items
+                subtemplateItems.forEach(i => i.classList.remove('selected'));
+                // Add selected class to clicked item
+                item.classList.add('selected');
+                // Update the subtemplate button text
+                const selectedSubtemplateText = item.querySelector('span').textContent;
+                document.getElementById('selectedSubtemplate').textContent = selectedSubtemplateText;
+                // Store the selected subtemplate
+                currentSubtemplate = selectedSubtemplateText;
+                // Close the modal
+                subtemplateModal.hide();
+            });
+        });
     }
 
     // Load history from localStorage
