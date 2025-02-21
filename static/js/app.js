@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const templateModalEl = document.getElementById('templateModal');
     const templateModal = new bootstrap.Modal(templateModalEl);
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
-    
-    // Get templates data
-    const templatesData = JSON.parse(templateModalEl.getAttribute('data-templates').replace(/&quot;/g, '"') || '{}');
+
+    // Get templates data from global variable
+    const templatesData = window.TEMPLATES_DATA || {};
     templateModal.show();
 
     // Template variables
@@ -53,7 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
             card.classList.add('selected');
             selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
             updateSubtemplates(selectedTemplate);
-            templateModal.hide();
+
+            // Force close the modal
+            const modalInstance = bootstrap.Modal.getInstance(templateModalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
         });
     });
 
@@ -69,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update subtemplates based on selected template
     function updateSubtemplates(template) {
-        const templatesData = JSON.parse(document.getElementById('templateModal').getAttribute('data-templates') || '{}');
         const subtemplates = templatesData[template]?.subtemplates || {};
 
         subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
