@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
     
     // Get templates data
-    const templatesData = JSON.parse(templateModalEl.getAttribute('data-templates') || '{}');
+    const templatesData = JSON.parse(templateModalEl.getAttribute('data-templates').replace(/&quot;/g, '"') || '{}');
     templateModal.show();
 
     // Template variables
