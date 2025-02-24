@@ -21,17 +21,28 @@ const SUBTEMPLATE_DESCRIPTIONS = {
     "STEM Project": "Integrated science, technology, engineering, and math activities",
     "Technology Integration": "Strategic incorporation of digital tools and resources",
     "Lab + Material List": "Detailed preparation guide for hands-on experimental activities",
-    "Learning Situations": "Context-rich scenarios for authentic learning experiences"
+    "Learning Situations": "Context-rich scenarios for authentic learning experiences",
+    "Multiple Choice Questions": "A set of multiple choice questions for assessment.",
+    "Word Problems": "A set of word problems for assessment.",
+    "Think-Pair-Share": "A collaborative learning strategy.",
+    "Team Building Activity": "An activity designed to foster teamwork and collaboration.",
+    "Assessment Outline": "A structured outline for creating assessments."
 };
 
-// Define popular subtemplates
+// Define popular subtemplates with additional commonly used ones
 const POPULAR_SUBTEMPLATES = [
     "5 E's Lesson Plan",
     "Student-Centered Approach",
     "Project Based Learning",
     "STEM Project",
     "Unit Plan",
-    "Technology Integration"
+    "Technology Integration",
+    "Multiple Choice Questions",
+    "Word Problems",
+    "Think-Pair-Share",
+    "Team Building Activity",
+    "Lab + Material List",
+    "Assessment Outline"
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -82,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Generate HTML for a category of subtemplates
         const generateCategoryHTML = (category, items, isPopular = false) => {
             // Filter items based on search query
-            const filteredItems = items.filter(item => 
+            const filteredItems = items.filter(item =>
                 item.toLowerCase().includes(searchQuery.toLowerCase())
             );
 
@@ -114,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <span>${item}</span>
                                                 ${isPopular ? '<span class="badge bg-primary ms-2">Popular</span>' : ''}
                                             </div>
-                                            <i class="fas fa-info-circle text-primary" 
-                                               data-bs-toggle="tooltip" 
-                                               data-bs-placement="top" 
+                                            <i class="fas fa-info-circle text-primary"
+                                               data-bs-toggle="tooltip"
+                                               data-bs-placement="top"
                                                title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
                                         </div>
                                     </div>
@@ -129,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         // Generate HTML for all categories
-        let html = Object.entries(subtemplates).map(([category, items]) => 
+        let html = Object.entries(subtemplates).map(([category, items]) =>
             generateCategoryHTML(category, items)
         ).join('');
 
@@ -279,7 +290,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // Load history from localStorage
     // Toggle arrow rotation
     document.querySelector('.card-title').addEventListener('click', function() {
         const arrow = this.querySelector('.fa-chevron-down');
@@ -329,7 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.remove('active');
         }
     };
-
 
 
     // Form submission
@@ -471,18 +480,23 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
     });
 
-    // Add resource generation function
+    // Add resource generation with web scraping
     async function generateResources(data) {
         const prompt = `Based on this lesson plan about "${data.title}", suggest:
         1. Three relevant educational YouTube videos (titles only)
-        2. Three worksheet or material ideas
+        2. Three worksheet ideas
+        3. Three recommended teaching materials from Amazon
         Keep suggestions concise and directly related to the lesson content.`;
 
         try {
             const response = await fetch('/generate_resources', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify({
+                    prompt,
+                    subject: data.title,
+                    grade: data.grade
+                })
             });
 
             if (!response.ok) throw new Error('Failed to generate resources');
@@ -492,11 +506,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update resources in the UI
             const videoContainer = document.querySelector('.video-resources');
             const worksheetContainer = document.querySelector('.worksheet-resources');
+            const materialsContainer = document.querySelector('.materials-resources');
 
             videoContainer.innerHTML = resources.videos.map(video => `
                 <div class="resource-item">
-                    <i class="fas fa-play-circle text-danger me-2"></i>
-                    ${video}
+                    <i class="fab fa-youtube text-danger me-2"></i>
+                    <a href="${video.url}" target="_blank" class="text-decoration-none">
+                        ${video.title}
+                    </a>
                 </div>
             `).join('');
 
@@ -504,6 +521,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="resource-item">
                     <i class="fas fa-file-download text-primary me-2"></i>
                     ${worksheet}
+                </div>
+            `).join('');
+
+            materialsContainer.innerHTML = resources.materials.map(material => `
+                <div class="resource-item">
+                    <i class="fas fa-shopping-cart text-success me-2"></i>
+                    <a href="${material.url}" target="_blank" class="text-decoration-none">
+                        ${material.title} - ${material.price}
+                    </a>
                 </div>
             `).join('');
         } catch (error) {

@@ -2,6 +2,9 @@ import os
 import json
 from flask import Flask, render_template, request, jsonify
 from openai import OpenAI
+import urllib.parse
+import trafilatura
+import re
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET")
@@ -190,19 +193,66 @@ def generate_resources():
     try:
         data = request.json
         prompt = data.get('prompt', '')
+        subject = data.get('subject', '')
+        grade = data.get('grade', '')
 
+        # Generate initial suggestions using OpenAI
         response = openai.chat.completions.create(
             model="gpt-4o",
             messages=[{
                 "role": "user",
-                "content": f"{prompt}\nRespond in JSON format with two arrays: 'videos' and 'worksheets'"
+                "content": f"{prompt}\nRespond in JSON format with arrays: 'videos', 'worksheets', 'materials'"
             }],
             response_format={"type": "json_object"}
         )
 
-        resources = json.loads(response.choices[0].message.content)
-        return jsonify(resources)
+        suggestions = json.loads(response.choices[0].message.content)
+
+        # Search YouTube for relevant videos
+        youtube_search_query = f"education {subject} {grade} lesson"
+        youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(youtube_search_query)}"
+        downloaded = trafilatura.fetch_url(youtube_url)
+        youtube_content = trafilatura.extract(downloaded)
+
+        # Extract video titles and URLs using regex (basic example)
+        video_pattern = r'"title":{"runs":\[{"text":"([^"]+)"}\].*?"videoId":"([^"]+)"'
+        videos = []
+        for match in re.finditer(video_pattern, youtube_content or ""):
+            if len(videos) < 3:  # Limit to 3 videos
+                title, video_id = match.groups()
+                videos.append({
+                    "title": title,
+                    "url": f"https://www.youtube.com/watch?v={video_id}"
+                })
+
+        # For worksheets, we'll use the OpenAI suggestions
+        worksheets = suggestions.get('worksheets', [])
+
+        # Search for educational materials
+        amazon_search_query = f"teaching supplies {subject} {grade}"
+        amazon_url = f"https://www.amazon.com/s?k={urllib.parse.quote(amazon_search_query)}"
+        downloaded = trafilatura.fetch_url(amazon_url)
+        amazon_content = trafilatura.extract(downloaded)
+
+        # Extract product information (basic example)
+        product_pattern = r'"title":"([^"]+)".*?"price":{"raw":"([^"]+)".*?"url":"([^"]+)"'
+        materials = []
+        for match in re.finditer(product_pattern, amazon_content or ""):
+            if len(materials) < 3:  # Limit to 3 products
+                title, price, url = match.groups()
+                materials.append({
+                    "title": title,
+                    "price": price,
+                    "url": url
+                })
+
+        return jsonify({
+            "videos": videos or suggestions.get('videos', []),
+            "worksheets": worksheets,
+            "materials": materials or suggestions.get('materials', [])
+        })
     except Exception as e:
+        print(f"Error generating resources: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
