@@ -108,35 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const lessonForm = document.getElementById('lessonForm');
     const lessonOutput = document.getElementById('lessonPlanOutput');
     const changeTemplateBtn = document.getElementById('changeTemplate');
-    const toggleAdvancedBtn = document.getElementById('toggleAdvanced');
-    const advancedFields = document.getElementById('advancedFields');
+    const personalizationForm = document.getElementById('personalizationForm');
     const sidebar = document.getElementById('historySidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const closeSidebar = document.getElementById('closeSidebar');
-    const personalizationForm = document.getElementById('personalizationForm');
 
-    // Load favorites from localStorage
-    let favorites = JSON.parse(localStorage.getItem('subtemplateFavorites') || '[]');
 
-    // Function to toggle favorite
-    function toggleFavorite(subtemplate) {
-        const index = favorites.indexOf(subtemplate);
-        if (index === -1) {
-            favorites.push(subtemplate);
-        } else {
-            favorites.splice(index, 1);
-        }
-        localStorage.setItem('subtemplateFavorites', JSON.stringify(favorites));
-        updateSubtemplates(selectedTemplate, subtemplateSearchInput.value);
-    }
-
-    // Update subtemplates display with search and favorites
+    // Update subtemplates display
     function updateSubtemplates(template, searchQuery = '') {
         const subtemplates = templatesData[template]?.subtemplates || {};
         let allSubtemplates = [];
         showingAllSubtemplates = searchQuery.length > 0;
 
-        // Collect all subtemplates for the current template
+        // Collect all subtemplates
         Object.values(subtemplates).forEach(items => {
             allSubtemplates = allSubtemplates.concat(items);
         });
@@ -146,15 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
             item.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-        // Sort subtemplates by popularity and favorites
+        // Sort subtemplates by popularity
         filteredSubtemplates.sort((a, b) => {
-            const aFavorite = favorites.includes(a);
-            const bFavorite = favorites.includes(b);
             const aPopular = POPULAR_SUBTEMPLATES[template]?.includes(a);
             const bPopular = POPULAR_SUBTEMPLATES[template]?.includes(b);
-
-            if (aFavorite && !bFavorite) return -1;
-            if (!aFavorite && bFavorite) return 1;
             if (aPopular && !bPopular) return -1;
             if (!aPopular && bPopular) return 1;
             return 0;
@@ -168,9 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="subtemplate-category mb-4">
                     <h5 class="mb-3">${category}</h5>
                     <div class="row g-3">
-                        ${visibleItems.map(item => {
+                        ${items.map(item => {
                             const isPopular = POPULAR_SUBTEMPLATES[template]?.includes(item);
-                            const isFavorite = favorites.includes(item);
                             return `
                                 <div class="col-md-6">
                                     <div class="subtemplate-item" data-subtemplate="${item}">
@@ -178,11 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div>
                                                 <span>${item}</span>
                                                 ${isPopular ? '<span class="badge bg-primary ms-2">Popular</span>' : ''}
-                                                ${isFavorite ? '<span class="badge bg-warning ms-2">Favorite</span>' : ''}
                                             </div>
                                             <div class="d-flex align-items-center">
-                                                <i class="fas fa-heart me-2 ${isFavorite ? 'text-danger' : 'text-muted'}"
-                                                   onclick="event.stopPropagation(); toggleFavorite('${item}')"
+                                                <i class="fas fa-heart me-2 text-muted"
                                                    style="cursor: pointer;"></i>
                                                 <i class="fas fa-info-circle text-primary"
                                                    data-bs-toggle="tooltip"
@@ -243,11 +219,148 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Make toggleFavorite available globally
-    window.toggleFavorite = toggleFavorite;
+    // Template selection
+    templateCards.forEach(card => {
+        card.addEventListener('click', () => {
+            selectedTemplate = card.dataset.template;
+            templateCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
+            updateSubtemplates(selectedTemplate);
+            templateModal.hide();
+        });
+    });
 
+    // Change template button
+    changeTemplateBtn.addEventListener('click', () => {
+        templateModal.show();
+    });
 
-    // Update personalization form handler
+    // Show subtemplate modal
+    subtemplateButton.addEventListener('click', () => {
+        subtemplateModal.show();
+    });
+
+    // Search functionality
+    subtemplateSearchInput.addEventListener('input', (e) => {
+        updateSubtemplates(selectedTemplate, e.target.value);
+    });
+
+    // Display lesson plan
+    function displayLessonPlan(data) {
+        const createSection = (title, content, summary) => `
+            <div class="content-section">
+                <div class="section-header" onclick="this.parentElement.querySelector('.section-content').classList.toggle('expanded')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>${title}</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-summary">
+                        ${Array.isArray(summary) ? `<p>${summary[0]}</p>` : ''}
+                    </div>
+                </div>
+                <div class="section-content">
+                    ${content}
+                </div>
+            </div>
+        `;
+
+        const html = `
+            <h3 class="mb-4">${data.title || 'Untitled Plan'}</h3>
+            ${createSection('Overview',
+                `<p>${data.overview || 'No overview provided'}</p>`,
+                data.overview_summary)}
+            ${createSection('Objectives',
+                `<ul>${(data.objectives || []).map(obj => `<li>${obj}</li>`).join('')}</ul>`,
+                data.objectives_summary)}
+            ${createSection('Materials',
+                `<ul>${(data.materials || []).map(mat => `<li>${mat}</li>`).join('')}</ul>`,
+                data.materials_summary)}
+            ${createSection('Procedure',
+                `<ol>${(data.procedure || []).map(step => `<li>${step}</li>`).join('')}</ol>`,
+                data.procedure_summary)}
+            ${createSection('Assessment',
+                `<p>${data.assessment || 'No assessment provided'}</p>`,
+                data.assessment_summary)}
+            ${createSection('Extensions',
+                `<ul>${(data.extensions || []).map(ext => `<li>${ext}</li>`).join('')}</ul>`,
+                data.extensions_summary)}
+        `;
+
+        lessonOutput.innerHTML = html;
+    }
+
+    // Form submission
+    lessonForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent form from submitting normally
+
+        if (!selectedTemplate) {
+            alert('Please select a template first');
+            templateModal.show();
+            return;
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const spinner = submitBtn.querySelector('.spinner-border');
+        const originalBtnText = submitBtn.textContent;
+
+        try {
+            // Show loading state
+            submitBtn.disabled = true;
+            spinner.classList.remove('d-none');
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Generating...
+            `;
+
+            // Show loading in output area
+            lessonOutput.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p class="text-muted">Generating your plan...</p>
+                </div>
+            `;
+
+            const formData = {
+                template: selectedTemplate,
+                subtemplate: currentSubtemplate,
+                subject: this.elements.subject.value,
+                grade: this.elements.grade?.value || '',
+                duration: this.elements.duration?.value || '',
+                objectives: this.elements.objectives?.value || ''
+            };
+
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate plan');
+            }
+
+            const data = await response.json();
+            displayLessonPlan(data);
+
+        } catch (error) {
+            lessonOutput.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Error: ${error.message}
+                </div>
+            `;
+        } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            spinner.classList.add('d-none');
+            submitBtn.textContent = originalBtnText;
+        }
+    });
+
+    // Personalization form handler
     personalizationForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -258,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         localStorage.setItem('teacherPreferences', JSON.stringify(preferences));
 
-        // Update form fields with saved preferences
+        // Update form fields
         if (document.querySelector('[name="grade"]')) {
             document.querySelector('[name="grade"]').value = preferences.grade;
         }
@@ -269,6 +382,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Close modal
         bootstrap.Modal.getInstance(document.getElementById('personalizationModal')).hide();
     });
+
+    // Load saved preferences
+    const loadSavedPreferences = () => {
+        const preferences = JSON.parse(localStorage.getItem('teacherPreferences') || '{}');
+        if (preferences.grade) {
+            document.querySelector('[name="grade"]').value = preferences.grade;
+        }
+        if (preferences.duration) {
+            document.querySelector('[name="duration"]').value = preferences.duration;
+        }
+    };
+
+    // Call loadSavedPreferences on page load
+    loadSavedPreferences();
 
     // Add resource generation with quiz/worksheet generation
     async function generateResources(data) {
@@ -343,29 +470,12 @@ document.addEventListener('DOMContentLoaded', function() {
         bootstrap.Modal.getInstance(document.getElementById('quizModal')).show();
     };
 
-    // Update subtemplates based on selected template
-    templateCards.forEach(card => {
-        card.addEventListener('click', () => {
-            templateCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedTemplate = card.dataset.template;
-            selectedTemplateDisplay.textContent = selectedTemplate;
-            updateSubtemplates(selectedTemplate);
-            templateModal.hide();
-        });
+    //Sidebar Toggle
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('show');
     });
 
-    // Handle subtemplate button click
-    subtemplateButton.addEventListener('click', () => {
-        subtemplateModal.show();
+    closeSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('show');
     });
-
-    // Handle subtemplate search input
-    subtemplateSearchInput.addEventListener('input', () => {
-        updateSubtemplates(selectedTemplate, subtemplateSearchInput.value);
-    });
-
-
-    // ...rest of the original code...
-
 });
