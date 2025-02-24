@@ -4,61 +4,35 @@ const SUBTEMPLATE_DESCRIPTIONS = {
     "Lesson Seed": "Basic lesson structure with essential components and flexible adaptation options",
     "Horizontal Lesson Planner": "Timeline-based lesson organization with clear progression of activities",
     "SPARK Lesson": "Structured, Progressive, Active, Reflective, Knowledge-based approach to lesson design",
-    
+
     // Learning Approaches
     "Student-Centered Approach": "Focuses on active learning and student engagement through collaborative activities",
     "Project Based Learning": "Long-term learning through complex, authentic projects and real-world challenges",
     "Team Based Activity": "Collaborative learning experiences that promote cooperation and communication",
     "Universal Design for Learning": "Inclusive teaching approach accommodating diverse learning styles and needs",
-    
+
     // Content Organization
     "Unit Plan": "Comprehensive overview of connected lessons and learning objectives",
     "Book Summary": "Structured outline for literature analysis and key concepts",
     "Vocabulary List": "Organized collection of key terms with definitions and usage examples",
     "Notes Outline": "Hierarchical organization of lesson content and key points",
-    
+
     // Special Focus
     "STEM Project": "Integrated science, technology, engineering, and math activities",
     "Technology Integration": "Strategic incorporation of digital tools and resources",
     "Lab + Material List": "Detailed preparation guide for hands-on experimental activities",
-    "Learning Situations": "Context-rich scenarios for authentic learning experiences",
-    
-    // Question Types
-    "Multiple Choice Questions": "Traditional format testing with options for varied difficulty levels",
-    "Word Problems": "Application-based questions requiring problem-solving skills",
-    "Fill In The Blank": "Completion-style questions focusing on key concepts",
-    "True/False Questions": "Quick assessment of factual understanding",
-    
-    // Evaluation Tools
-    "Analytic Rubric": "Detailed scoring guide with specific criteria and performance levels",
-    "Holistic Rubric": "Overall assessment tool with comprehensive performance descriptions",
-    "Assessment Outline": "Framework for evaluating student learning and progress",
-    "Evidence Statements": "Clear indicators of student understanding and achievement",
-    
-    // Interactive Activities
-    "Think-Pair-Share": "Structured discussion method promoting individual and collaborative learning",
-    "Jigsaw Activity": "Cooperative learning strategy where students become experts on content",
-    "Round Robin": "Group activity format ensuring equal participation from all students",
-    "4 Corners": "Movement-based activity for expressing opinions and discussing topics",
-    
-    // Learning Games
-    "Bingo Style": "Engaging review game format using recognition and recall",
-    "Jeopardy Style": "Competitive question-and-answer game for content review",
-    "Quiz Quiz Trade": "Active learning strategy combining movement and peer review",
-    "Escape Room": "Problem-solving adventure with curriculum-based challenges",
-    
-    // Engagement Tools
-    "Class Poll": "Quick feedback tool for gathering student opinions and understanding",
-    "Self-Assessment": "Reflective tool for students to evaluate their own learning",
-    "Reflective Journaling": "Written reflection on learning experiences and progress",
-    "Mad Lib": "Creative writing activity with parts of speech practice",
-    
-    // Social Learning
-    "Team Building Activity": "Exercises designed to improve group dynamics and cooperation",
-    "S.E.L. Activity": "Social-emotional learning experiences for personal growth",
-    "Mindfulness Activity": "Exercises promoting focus and emotional awareness",
-    "Conversation Practice": "Structured dialogue activities for language and communication skills"
+    "Learning Situations": "Context-rich scenarios for authentic learning experiences"
 };
+
+// Define popular subtemplates
+const POPULAR_SUBTEMPLATES = [
+    "5 E's Lesson Plan",
+    "Student-Centered Approach",
+    "Project Based Learning",
+    "STEM Project",
+    "Unit Plan",
+    "Technology Integration"
+];
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
@@ -80,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Template variables
     let selectedTemplate = '';
     let currentSubtemplate = '';
+    let showingAllSubtemplates = false;
 
     // DOM elements
     const templateCards = document.querySelectorAll('.template-card');
@@ -87,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedSubtemplateDisplay = document.getElementById('selectedSubtemplate');
     const subtemplateButton = document.getElementById('subtemplateButton');
     const subtemplateContent = document.getElementById('subtemplateContent');
+    const subtemplateSearchInput = document.getElementById('subtemplateSearch');
     const lessonForm = document.getElementById('lessonForm');
     const lessonOutput = document.getElementById('lessonPlanOutput');
     const changeTemplateBtn = document.getElementById('changeTemplate');
@@ -97,6 +73,165 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeSidebar = document.getElementById('closeSidebar');
     const personalizationForm = document.getElementById('personalizationForm');
 
+    // Update subtemplates based on selected template
+    function updateSubtemplates(template, searchQuery = '') {
+        const subtemplates = templatesData[template]?.subtemplates || {};
+        let allSubtemplates = [];
+        let popularCount = 0;
+
+        // Generate HTML for a category of subtemplates
+        const generateCategoryHTML = (category, items, isPopular = false) => {
+            // Filter items based on search query
+            const filteredItems = items.filter(item => 
+                item.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            if (filteredItems.length === 0) return '';
+
+            // Sort items by popularity
+            filteredItems.sort((a, b) => {
+                const aPopular = POPULAR_SUBTEMPLATES.includes(a);
+                const bPopular = POPULAR_SUBTEMPLATES.includes(b);
+                if (aPopular && !bPopular) return -1;
+                if (!aPopular && bPopular) return 1;
+                return 0;
+            });
+
+            return `
+                <div class="subtemplate-category mb-4">
+                    <h5 class="mb-3">${category}</h5>
+                    <div class="row g-3">
+                        ${filteredItems.map(item => {
+                            const isPopular = POPULAR_SUBTEMPLATES.includes(item);
+                            popularCount += isPopular ? 1 : 0;
+                            if (!showingAllSubtemplates && !isPopular && popularCount > 6) return '';
+
+                            return `
+                                <div class="col-md-6">
+                                    <div class="subtemplate-item" data-subtemplate="${item}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <span>${item}</span>
+                                                ${isPopular ? '<span class="badge bg-primary ms-2">Popular</span>' : ''}
+                                            </div>
+                                            <i class="fas fa-info-circle text-primary" 
+                                               data-bs-toggle="tooltip" 
+                                               data-bs-placement="top" 
+                                               title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        // Generate HTML for all categories
+        let html = Object.entries(subtemplates).map(([category, items]) => 
+            generateCategoryHTML(category, items)
+        ).join('');
+
+        // Add "See More" button if there are hidden templates
+        if (!showingAllSubtemplates && popularCount > 6) {
+            html += `
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary" id="seeMoreSubtemplates">
+                        See More Subtemplates
+                    </button>
+                </div>
+            `;
+        }
+
+        subtemplateContent.innerHTML = html;
+
+        // Initialize tooltips for new content
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+        // Add click handlers for subtemplate items
+        const subtemplateItems = document.querySelectorAll('.subtemplate-item');
+        subtemplateItems.forEach(item => {
+            item.addEventListener('click', () => {
+                subtemplateItems.forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                currentSubtemplate = item.dataset.subtemplate;
+                selectedSubtemplateDisplay.textContent = currentSubtemplate;
+                subtemplateModal.hide();
+            });
+        });
+
+        // Add click handler for "See More" button
+        const seeMoreBtn = document.getElementById('seeMoreSubtemplates');
+        if (seeMoreBtn) {
+            seeMoreBtn.addEventListener('click', () => {
+                showingAllSubtemplates = true;
+                updateSubtemplates(selectedTemplate, subtemplateSearchInput.value);
+            });
+        }
+    }
+
+    // Search functionality
+    subtemplateSearchInput.addEventListener('input', (e) => {
+        updateSubtemplates(selectedTemplate, e.target.value);
+    });
+
+    // Display lesson plan
+    function displayLessonPlan(data) {
+        if (!data.objectives || !Array.isArray(data.objectives)) {
+            console.error('Invalid objectives data:', data.objectives);
+            data.objectives = ['No objectives specified'];
+        }
+
+        const createSection = (title, content, summary) => `
+            <div class="content-section">
+                <div class="section-header" onclick="this.parentElement.querySelector('.section-content').classList.toggle('expanded')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>${title}</h4>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="section-summary">
+                        ${Array.isArray(summary) ? `<p>${summary[0]}</p>` : ''}
+                    </div>
+                </div>
+                <div class="section-content">
+                    ${content}
+                </div>
+            </div>
+        `;
+
+        const html = `
+            <h3 class="mb-4">${data.title || 'Untitled Plan'}</h3>
+            ${createSection('Overview',
+                `<p>${data.overview || 'No overview provided'}</p>`,
+                data.overview_summary)}
+            ${createSection('Objectives',
+                `<ul>${(data.objectives || []).map(obj => `<li>${obj}</li>`).join('')}</ul>`,
+                data.objectives_summary)}
+            ${createSection('Materials',
+                `<ul>${(data.materials || []).map(mat => `<li>${mat}</li>`).join('')}</ul>`,
+                data.materials_summary)}
+            ${createSection('Procedure',
+                `<ol>${(data.procedure || []).map(step => `<li>${step}</li>`).join('')}</ol>`,
+                data.procedure_summary)}
+            ${createSection('Assessment',
+                `<p>${data.assessment || 'No assessment provided'}</p>`,
+                data.assessment_summary)}
+            ${createSection('Extensions',
+                `<ul>${(data.extensions || []).map(ext => `<li>${ext}</li>`).join('')}</ul>`,
+                data.extensions_summary)}
+        `;
+
+        lessonOutput.innerHTML = html;
+
+        // Add resources section
+        const resourcesTemplate = document.getElementById('resourcesTemplate').innerHTML;
+        lessonOutput.insertAdjacentHTML('beforeend', resourcesTemplate);
+
+        // Generate resources based on the lesson plan
+        generateResources(data);
+    }
 
     // Sidebar Toggle
     sidebarToggle.addEventListener('click', () => {
@@ -143,60 +278,13 @@ document.addEventListener('DOMContentLoaded', function() {
         subtemplateModal.show();
     });
 
-    // Update subtemplates based on selected template
-    function updateSubtemplates(template) {
-        const subtemplates = templatesData[template]?.subtemplates || {};
-
-        subtemplateContent.innerHTML = Object.entries(subtemplates).map(([category, items]) => `
-            <div class="subtemplate-category mb-4">
-                <h5 class="mb-3">${category}</h5>
-                <div class="row g-3">
-                    ${items.map(item => `
-                        <div class="col-md-6">
-                            <div class="subtemplate-item" data-subtemplate="${item}">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <span>${item}</span>
-                                    <i class="fas fa-info-circle text-primary" 
-                                       data-bs-toggle="tooltip" 
-                                       data-bs-placement="top" 
-                                       title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-
-        // Initialize tooltips for new content
-        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltips.forEach(el => new bootstrap.Tooltip(el));
-
-        // Add click handlers for subtemplate items
-        const subtemplateItems = document.querySelectorAll('.subtemplate-item');
-        subtemplateItems.forEach(item => {
-            item.addEventListener('click', () => {
-                // Remove selected class from all items
-                subtemplateItems.forEach(i => i.classList.remove('selected'));
-                // Add selected class to clicked item
-                item.classList.add('selected');
-                // Update the subtemplate button text
-                const selectedSubtemplateText = item.querySelector('span').textContent;
-                document.getElementById('selectedSubtemplate').textContent = selectedSubtemplateText;
-                // Store the selected subtemplate
-                currentSubtemplate = selectedSubtemplateText;
-                // Close the modal
-                subtemplateModal.hide();
-            });
-        });
-    }
 
     // Load history from localStorage
     // Toggle arrow rotation
     document.querySelector('.card-title').addEventListener('click', function() {
         const arrow = this.querySelector('.fa-chevron-down');
         const output = document.getElementById('lessonPlanOutput');
-        
+
         if (output.style.display === 'none') {
             output.style.display = 'block';
             arrow.style.transform = 'rotate(0deg)';
@@ -243,7 +331,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
 
-    
 
     // Form submission
     lessonForm.addEventListener('submit', async function(e) {
@@ -318,59 +405,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial history load
     loadHistory();
-
-    // Display lesson plan
-    function displayLessonPlan(data) {
-        if (!data.objectives || !Array.isArray(data.objectives)) {
-            console.error('Invalid objectives data:', data.objectives);
-            data.objectives = ['No objectives specified'];
-        }
-
-        const createSection = (title, content, summary) => `
-            <div class="content-section">
-                <div class="section-header" onclick="this.nextElementSibling.classList.toggle('expanded')">
-                    <h4>${title}</h4>
-                    <div class="section-summary">
-                        ${Array.isArray(summary) ? `<p>${summary[0]}</p>` : ''}
-                    </div>
-                </div>
-                <div class="section-content">
-                    ${content}
-                </div>
-            </div>
-        `;
-
-        const html = `
-            <h3 class="mb-4">${data.title || 'Untitled Plan'}</h3>
-            ${createSection('Overview',
-                `<p>${data.overview || 'No overview provided'}</p>`,
-                data.overview_summary)}
-            ${createSection('Objectives',
-                `<ul>${(data.objectives || []).map(obj => `<li>${obj}</li>`).join('')}</ul>`,
-                data.objectives_summary)}
-            ${createSection('Materials',
-                `<ul>${(data.materials || []).map(mat => `<li>${mat}</li>`).join('')}</ul>`,
-                data.materials_summary)}
-            ${createSection('Procedure',
-                `<ol>${(data.procedure || []).map(step => `<li>${step}</li>`).join('')}</ol>`,
-                data.procedure_summary)}
-            ${createSection('Assessment',
-                `<p>${data.assessment || 'No assessment provided'}</p>`,
-                data.assessment_summary)}
-            ${createSection('Extensions',
-                `<ul>${(data.extensions || []).map(ext => `<li>${ext}</li>`).join('')}</ul>`,
-                data.extensions_summary)}
-        `;
-
-        lessonOutput.innerHTML = html;
-
-        // Add resources section
-        const resourcesTemplate = document.getElementById('resourcesTemplate').innerHTML;
-        lessonOutput.insertAdjacentHTML('beforeend', resourcesTemplate);
-
-        // Generate resources based on the lesson plan
-        generateResources(data);
-    }
 
     // Add personalization handling
     personalizationForm.addEventListener('submit', function(e) {
