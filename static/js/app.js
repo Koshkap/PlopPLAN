@@ -450,8 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('[name="duration"]').value = preferences.duration;
 
         // Close modal using Bootstrap's modal instance
-        const personalizationModal = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
-        personalizationModal.hide();
+        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
+        modalInstance.hide();
     });
 
     // Load saved preferences on page load
@@ -472,11 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('exportPDF').addEventListener('click', async function() {
         const content = document.getElementById('lessonPlanOutput');
 
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        document.body.appendChild(script);
-
-        script.onload = function() {
+        try {
             const opt = {
                 margin: 1,
                 filename: 'lesson_plan.pdf',
@@ -485,37 +481,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(content).save();
-        };
+            await html2pdf().set(opt).from(content).save();
+        } catch (error) {
+            console.error('Error exporting PDF:', error);
+            alert('Failed to export PDF. Please try again.');
+        }
     });
 
     document.getElementById('exportWord').addEventListener('click', function() {
         const content = document.getElementById('lessonPlanOutput');
-        const header = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-                  xmlns:w='urn:schemas-microsoft-com:office:word' 
-                  xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset="utf-8">
-                    <title>Lesson Plan</title>
-                    <style>
-                        body { font-family: Calibri, sans-serif; }
-                        .section-header { font-size: 16pt; color: #1a73e8; margin-top: 20pt; }
-                        .section-content { margin-left: 20pt; }
-                    </style>
-                </head>
-                <body>
-        `;
-        const footer = '</body></html>';
-        const sourceHTML = header + content.innerHTML + footer;
+        try {
+            const header = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                      xmlns:w='urn:schemas-microsoft-com:office:word' 
+                      xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Lesson Plan</title>
+                        <style>
+                            body { font-family: Calibri, sans-serif; }
+                            .section-header { font-size: 16pt; color: #1a73e8; margin-top: 20pt; }
+                            .section-content { margin-left: 20pt; }
+                            ul, ol { margin-left: 20pt; }
+                            li { margin-bottom: 8pt; }
+                        </style>
+                    </head>
+                    <body>
+            `;
+            const footer = '</body></html>';
+            const sourceHTML = header + content.innerHTML + footer;
 
-        const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-        const fileDownload = document.createElement("a");
-        document.body.appendChild(fileDownload);
-        fileDownload.href = source;
-        fileDownload.download = 'lesson_plan.doc';
-        fileDownload.click();
-        document.body.removeChild(fileDownload);
+            const blob = new Blob([sourceHTML], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'lesson_plan.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error exporting Word document:', error);
+            alert('Failed to export Word document. Please try again.');
+        }
     });
 
     // Add resource generation with web scraping

@@ -17,29 +17,29 @@ LESSON_TEMPLATES = {
     "lesson": {
         "description": "Create comprehensive lesson plans with clear objectives, activities, and methods",
         "subtemplates": {
-            "Basic Frameworks": [
+            "Core Lesson Plans": [
                 "5 E's Lesson Plan",
-                "Lesson Seed",
-                "Horizontal Lesson Planner",
-                "SPARK Lesson"
+                "Student-Centered Approach", 
+                "Project Based Learning",
+                "STEM Project"
             ],
-            "Learning Approaches": [
-                "Student-Centered Approach",
-                "Project Based Learning (PBL)",
-                "Team Based Activity",
-                "Universal Design for Learning"
+            "Interactive Activities": [
+                "Think-Pair-Share",
+                "Team Building Activity",
+                "Jigsaw Activity",
+                "Quiz Quiz Trade"
             ],
-            "Content Organization": [
+            "Assessment Tools": [
+                "Multiple Choice Questions",
+                "Word Problems",
+                "Assessment Outline",
+                "Evidence Statements"
+            ],
+            "Learning Tools": [
                 "Unit Plan",
-                "Book Summary",
-                "Vocabulary List",
-                "Notes Outline"
-            ],
-            "Special Focus": [
-                "STEM Project",
-                "Technology Integration",
                 "Lab + Material List",
-                "Learning Situations"
+                "Technology Integration",
+                "Book Summary"
             ]
         }
     },

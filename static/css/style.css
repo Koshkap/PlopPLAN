@@ -238,7 +238,7 @@ body {
 /* Main content shift when sidebar is open */
 .container {
     transition: margin-left var(--transition-speed);
-    padding-left: 80px; /* Add padding to prevent overlap */
+    padding-left: 100px; /* Increased padding to prevent overlap */
 }
 
 .sidebar-active .container {
@@ -308,7 +308,7 @@ body {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 1050;
+    z-index: 1030; /* Below sidebar z-index */
     background-color: var(--primary-color);
     color: white;
     padding: 8px 16px;
