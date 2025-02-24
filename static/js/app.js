@@ -26,23 +26,37 @@ const SUBTEMPLATE_DESCRIPTIONS = {
     "Word Problems": "A set of word problems for assessment.",
     "Think-Pair-Share": "A collaborative learning strategy.",
     "Team Building Activity": "An activity designed to foster teamwork and collaboration.",
-    "Assessment Outline": "A structured outline for creating assessments."
+    "Assessment Outline": "A structured outline for creating assessments.",
+    "Evidence Statements": "Statements describing the evidence needed to demonstrate learning.",
+    "Jigsaw Activity": "A cooperative learning activity where students become experts on a specific topic.",
+    "Quiz Quiz Trade": "A quick and engaging review activity."
 };
 
 // Define popular subtemplates with additional commonly used ones
 const POPULAR_SUBTEMPLATES = [
+    // Lesson Plans
     "5 E's Lesson Plan",
     "Student-Centered Approach",
     "Project Based Learning",
     "STEM Project",
-    "Unit Plan",
-    "Technology Integration",
+
+    // Assessment
     "Multiple Choice Questions",
     "Word Problems",
+    "Assessment Outline",
+    "Evidence Statements",
+
+    // Interactive
     "Think-Pair-Share",
     "Team Building Activity",
+    "Jigsaw Activity",
+    "Quiz Quiz Trade",
+
+    // Content
+    "Unit Plan",
     "Lab + Material List",
-    "Assessment Outline"
+    "Technology Integration",
+    "Book Summary"
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -57,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const templateModal = new bootstrap.Modal(templateModalEl);
     const subtemplateModal = new bootstrap.Modal(document.getElementById('subtemplateModal'));
     const personalizationModal = new bootstrap.Modal(document.getElementById('personalizationModal'));
+    const quizModal = new bootstrap.Modal(document.getElementById('quizModal')); // Added quiz modal
 
     // Get templates data from global variable
     const templatesData = window.TEMPLATES_DATA || {};
@@ -244,13 +259,15 @@ document.addEventListener('DOMContentLoaded', function() {
         generateResources(data);
     }
 
-    // Sidebar Toggle
+    // Sidebar Toggle with button visibility
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.add('active');
+        sidebarToggle.classList.add('hidden');
     });
 
     closeSidebar.addEventListener('click', () => {
         sidebar.classList.remove('active');
+        sidebarToggle.classList.remove('hidden');
     });
 
     // Close sidebar when clicking outside
@@ -259,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
             !sidebar.contains(e.target) &&
             !sidebarToggle.contains(e.target)) {
             sidebar.classList.remove('active');
+            sidebarToggle.classList.remove('hidden');
         }
     });
 
@@ -337,6 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const plan = history[index];
             displayLessonPlan(plan);
             sidebar.classList.remove('active');
+            sidebarToggle.classList.remove('hidden');
         }
     };
 
@@ -446,38 +465,57 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-
     // Call loadSavedPreferences on page load
     loadSavedPreferences();
 
-
     // Export functionality
-    document.getElementById('exportPDF').addEventListener('click', function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const content = lessonOutput.innerText;
-        const splitContent = doc.splitTextToSize(content, 180);
-        doc.text(splitContent, 15, 15);
-        doc.save('lesson_plan.pdf');
+    document.getElementById('exportPDF').addEventListener('click', async function() {
+        const content = document.getElementById('lessonPlanOutput');
+
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        document.body.appendChild(script);
+
+        script.onload = function() {
+            const opt = {
+                margin: 1,
+                filename: 'lesson_plan.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(content).save();
+        };
     });
 
     document.getElementById('exportWord').addEventListener('click', function() {
-        const content = lessonOutput.innerHTML;
-        const blob = new Blob([`
-            <html>
+        const content = document.getElementById('lessonPlanOutput');
+        const header = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                  xmlns:w='urn:schemas-microsoft-com:office:word' 
+                  xmlns='http://www.w3.org/TR/REC-html40'>
                 <head>
+                    <meta charset="utf-8">
+                    <title>Lesson Plan</title>
                     <style>
-                        body { font-family: Arial, sans-serif; }
+                        body { font-family: Calibri, sans-serif; }
+                        .section-header { font-size: 16pt; color: #1a73e8; margin-top: 20pt; }
+                        .section-content { margin-left: 20pt; }
                     </style>
                 </head>
-                <body>${content}</body>
-            </html>
-        `], { type: 'application/msword' });
+                <body>
+        `;
+        const footer = '</body></html>';
+        const sourceHTML = header + content.innerHTML + footer;
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'lesson_plan.doc';
-        link.click();
+        const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+        const fileDownload = document.createElement("a");
+        document.body.appendChild(fileDownload);
+        fileDownload.href = source;
+        fileDownload.download = 'lesson_plan.doc';
+        fileDownload.click();
+        document.body.removeChild(fileDownload);
     });
 
     // Add resource generation with web scraping
@@ -520,7 +558,11 @@ document.addEventListener('DOMContentLoaded', function() {
             worksheetContainer.innerHTML = resources.worksheets.map(worksheet => `
                 <div class="resource-item">
                     <i class="fas fa-file-download text-primary me-2"></i>
-                    ${worksheet}
+                    ${resources.has_quiz ? `
+                        <a href="#" onclick="showQuiz(\`${worksheet.replace(/`/g, '\\`')}\`); return false;">
+                            View Quiz/Worksheet
+                        </a>
+                    ` : worksheet}
                 </div>
             `).join('');
 
@@ -536,4 +578,46 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error generating resources:', error);
         }
     }
+
+    // Quiz/Worksheet handling
+    function showQuiz(content) {
+        const quizContent = document.getElementById('quizContent');
+        quizContent.innerHTML = marked.parse(content);
+        quizModal.show();
+    }
+
+    // Export quiz functionality
+    document.getElementById('exportQuizWord').addEventListener('click', function() {
+        const content = document.getElementById('quizContent');
+        const header = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                  xmlns:w='urn:schemas-microsoft-com:office:word' 
+                  xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset="utf-8"><title>Quiz/Worksheet</title></head>
+                <body>
+        `;
+        const footer = '</body></html>';
+        const sourceHTML = header + content.innerHTML + footer;
+
+        const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+        const fileDownload = document.createElement("a");
+        document.body.appendChild(fileDownload);
+        fileDownload.href = source;
+        fileDownload.download = 'quiz_worksheet.doc';
+        fileDownload.click();
+        document.body.removeChild(fileDownload);
+    });
+
+    document.getElementById('exportQuizPDF').addEventListener('click', function() {
+        const content = document.getElementById('quizContent');
+        const opt = {
+            margin: 1,
+            filename: 'quiz_worksheet.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(content).save();
+    });
 });

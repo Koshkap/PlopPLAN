@@ -212,44 +212,44 @@ def generate_resources():
         youtube_search_query = f"education {subject} {grade} lesson"
         youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(youtube_search_query)}"
         downloaded = trafilatura.fetch_url(youtube_url)
-        youtube_content = trafilatura.extract(downloaded)
 
-        # Extract video titles and URLs using regex (basic example)
-        video_pattern = r'"title":{"runs":\[{"text":"([^"]+)"}\].*?"videoId":"([^"]+)"'
-        videos = []
-        for match in re.finditer(video_pattern, youtube_content or ""):
-            if len(videos) < 3:  # Limit to 3 videos
-                title, video_id = match.groups()
-                videos.append({
-                    "title": title,
-                    "url": f"https://www.youtube.com/watch?v={video_id}"
-                })
+        if downloaded:
+            youtube_content = downloaded.decode('utf-8')
+            video_pattern = r'videoRenderer":{"videoId":"([^"]+)","thumbnail":.*?"title":{"runs":\[{"text":"([^"]+)"\}\]'
+            videos = []
+            for match in re.finditer(video_pattern, youtube_content):
+                if len(videos) < 3:  # Limit to 3 videos
+                    video_id, title = match.groups()
+                    if all(word.lower() not in title.lower() for word in ['#shorts', '#tiktok']):
+                        videos.append({
+                            "title": title,
+                            "url": f"https://www.youtube.com/watch?v={video_id}"
+                        })
+        else:
+            videos = suggestions.get('videos', [])
 
         # For worksheets, we'll use the OpenAI suggestions
         worksheets = suggestions.get('worksheets', [])
 
-        # Search for educational materials
-        amazon_search_query = f"teaching supplies {subject} {grade}"
-        amazon_url = f"https://www.amazon.com/s?k={urllib.parse.quote(amazon_search_query)}"
-        downloaded = trafilatura.fetch_url(amazon_url)
-        amazon_content = trafilatura.extract(downloaded)
+        # Generate quiz or worksheet content if needed
+        if any(keyword in subject.lower() for keyword in ['quiz', 'test', 'assessment', 'worksheet']):
+            quiz_response = openai.chat.completions.create(
+                model="gpt-4o",
+                messages=[{
+                    "role": "user",
+                    "content": f"Create a {subject} for grade {grade} with 10 questions. Include answer key. Format in markdown."
+                }]
+            )
+            worksheets = [quiz_response.choices[0].message.content]
 
-        # Extract product information (basic example)
-        product_pattern = r'"title":"([^"]+)".*?"price":{"raw":"([^"]+)".*?"url":"([^"]+)"'
-        materials = []
-        for match in re.finditer(product_pattern, amazon_content or ""):
-            if len(materials) < 3:  # Limit to 3 products
-                title, price, url = match.groups()
-                materials.append({
-                    "title": title,
-                    "price": price,
-                    "url": url
-                })
+        # Search for educational materials on Amazon
+        materials = suggestions.get('materials', [])  # Fallback to suggestions
 
         return jsonify({
-            "videos": videos or suggestions.get('videos', []),
+            "videos": videos,
             "worksheets": worksheets,
-            "materials": materials or suggestions.get('materials', [])
+            "materials": materials,
+            "has_quiz": any(keyword in subject.lower() for keyword in ['quiz', 'test', 'assessment', 'worksheet'])
         })
     except Exception as e:
         print(f"Error generating resources: {str(e)}")

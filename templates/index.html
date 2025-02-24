@@ -75,9 +75,9 @@
 
                             <!-- Describe your lesson -->
                             <div class="mb-3">
-                                <label class="form-label">Describe your lesson</label>
+                                <label class="form-label">Describe your lesson plan/resource</label>
                                 <textarea class="form-control" name="subject" required 
-                                    placeholder="Describe your lesson idea or topic..."></textarea>
+                                    placeholder="What would you like to teach? Describe your lesson idea or topic..."></textarea>
                             </div>
 
                             <!-- Subtemplate Button -->
@@ -203,6 +203,29 @@
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Save Preferences</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz/Worksheet Modal -->
+    <div class="modal fade" id="quizModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quiz/Worksheet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="quizContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="exportQuizWord">
+                        <i class="fas fa-file-word"></i> Export as Word
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="exportQuizPDF">
+                        <i class="fas fa-file-pdf"></i> Export as PDF
+                    </button>
                 </div>
             </div>
         </div>
