@@ -2,11 +2,85 @@
     --primary-color: #1a73e8;
     --primary-light: #e8f0fe;
     --transition-speed: 0.3s;
+    --sidebar-width: 300px;
 }
 
 body {
     background-color: #f8f9fa;
     color: #333;
+    padding-top: 70px; /* Added padding-top for history button */
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    left: calc(-1 * var(--sidebar-width));
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100%;
+    background: white;
+    z-index: 1040;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: left var(--transition-speed);
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-content {
+    padding: 1rem;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
+}
+
+/* Landing Page Editor Preview */
+.editor-preview {
+    transform: translateY(-20px);
+    transition: transform var(--transition-speed);
+}
+
+.mock-section {
+    border-radius: 6px;
+    padding: 12px;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.mock-title {
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.mock-text, .mock-list {
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 3px;
+    margin-bottom: 8px;
+    animation: pulse 2s infinite;
+}
+
+.mock-list::before {
+    content: '';
+    display: block;
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 3px;
+    margin-bottom: 8px;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.6; }
 }
 
 /* Template Cards */
@@ -49,6 +123,36 @@ body {
     background-color: var(--primary-light);
     color: var(--primary-color);
     font-weight: 500;
+}
+
+.card-title {
+    cursor: pointer;
+}
+
+.card-title .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+
+/* Resource Items */
+.resource-item {
+    padding: 0.75rem;
+    border-radius: 4px;
+    background: #f8f9fa;
+    margin-bottom: 0.5rem;
+    transition: background-color var(--transition-speed);
+}
+
+.resource-item:hover {
+    background-color: var(--primary-light);
+}
+
+.resource-item a {
+    color: inherit;
+}
+
+.resource-item a:hover {
+    color: var(--primary-color);
 }
 
 /* Section Preview */
@@ -102,6 +206,50 @@ body {
     transform: translateY(-1px);
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .sidebar {
+        width: 100%;
+        left: -100%;
+    }
+    body {
+        padding-top: 60px; /* Adjusted padding-top for smaller screens */
+    }
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: transform var(--transition-speed);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Main content shift when sidebar is open */
+.container {
+    transition: margin-left var(--transition-speed);
+    padding-left: 100px; /* Increased padding to prevent overlap */
+}
+
+.sidebar-active .container {
+    margin-left: var(--sidebar-width);
+}
+
+#subtemplateSelector {
+    cursor: pointer;
+    user-select: none;
+}
+
 /* Content Sections */
 .content-section {
     margin-bottom: 1.5rem;
@@ -142,20 +290,51 @@ body {
     border-left: 3px solid var(--primary-color);
 }
 
-/* Subtemplate Search */
-.input-group-text {
-    background-color: white;
-    border: 2px solid #e9ecef;
-    border-right: none;
-    padding: 0.75rem;
+.section-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-speed);
+    padding: 0 1rem;
+    background: white;
 }
 
-.input-group .form-control {
-    border-left: none;
+.section-content.expanded {
+    max-height: 1000px;
+    padding: 1.5rem 1rem;
 }
 
-.input-group .form-control:focus + .input-group-text {
-    border-color: var(--primary-color);
+/* Fixed Position History Button */
+.history-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1030; /* Below sidebar z-index */
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform var(--transition-speed);
+}
+
+.history-button.hidden {
+    transform: translateX(-100%);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+    }
+    .history-button {
+        top: 10px;
+        left: 10px;
+        padding: 6px 12px;
+    }
 }
 
 /* Popular Badge */
@@ -174,92 +353,22 @@ body {
     transform: translateY(-1px);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 1rem;
-    }
-
-    .card {
-        margin-bottom: 1rem;
-    }
+.history-button i {
+    font-size: 1.1em;
 }
 
-.card {
-    border: none;
-    border-radius: 12px;
-    transition: transform var(--transition-speed);
-}
-
-.card:hover {
-    transform: translateY(-2px);
-}
-
-/* Landing Page Editor Preview */
-.editor-preview {
-    transform: translateY(-20px);
-    transition: transform var(--transition-speed);
-}
-
-.mock-section {
-    border-radius: 6px;
-    padding: 12px;
-    background: #f8f9fa;
-    margin-bottom: 1rem;
-}
-
-.mock-title {
-    color: var(--primary-color);
-    margin-bottom: 8px;
-}
-
-.mock-text, .mock-list {
-    height: 12px;
-    background: #e9ecef;
-    border-radius: 3px;
-    margin-bottom: 8px;
-    animation: pulse 2s infinite;
-}
-
-.mock-list::before {
-    content: '';
-    display: block;
-    height: 12px;
-    background: #e9ecef;
-    border-radius: 3px;
-    margin-bottom: 8px;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 0.8; }
-    100% { opacity: 0.6; }
-}
-
-.resource-item {
+/* Subtemplate Search */
+.input-group-text {
+    background-color: white;
+    border: 2px solid #e9ecef;
+    border-right: none;
     padding: 0.75rem;
-    border-radius: 4px;
-    background: #f8f9fa;
-    margin-bottom: 0.5rem;
-    transition: background-color var(--transition-speed);
 }
 
-.resource-item:hover {
-    background-color: var(--primary-light);
+.input-group .form-control {
+    border-left: none;
 }
 
-.resource-item a {
-    color: inherit;
-}
-
-.resource-item a:hover {
-    color: var(--primary-color);
-}
-
-.card-title {
-    cursor: pointer;
-}
-
-.card-title .fa-chevron-down {
-    transition: transform 0.3s ease;
+.input-group .form-control:focus + .input-group-text {
+    border-color: var(--primary-color);
 }
