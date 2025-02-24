@@ -21,25 +21,29 @@ LESSON_TEMPLATES = {
                 "5 E's Lesson Plan",
                 "Student-Centered Approach", 
                 "Project Based Learning",
-                "STEM Project"
+                "Differentiated Instruction",
+                "STEM Project",
+                "Flipped Classroom",
+                "Inquiry-Based Learning",
+                "Direct Instruction"
             ],
             "Interactive Activities": [
                 "Think-Pair-Share",
                 "Team Building Activity",
                 "Jigsaw Activity",
-                "Quiz Quiz Trade"
-            ],
-            "Assessment Tools": [
-                "Multiple Choice Questions",
-                "Word Problems",
-                "Assessment Outline",
-                "Evidence Statements"
+                "Group Discussion",
+                "Role Playing",
+                "Hands-On Learning",
+                "Peer Teaching"
             ],
             "Learning Tools": [
                 "Unit Plan",
                 "Lab + Material List",
                 "Technology Integration",
-                "Book Summary"
+                "Book Summary",
+                "Learning Stations",
+                "Visual Aids",
+                "Interactive Notebook"
             ]
         }
     },
@@ -50,25 +54,28 @@ LESSON_TEMPLATES = {
                 "Multiple Choice Questions",
                 "Word Problems",
                 "Fill In The Blank",
-                "True/False Questions"
+                "True/False Questions",
+                "Short Answer",
+                "Open-Ended Questions",
+                "Problem Solving"
             ],
             "Evaluation Tools": [
                 "Analytic Rubric",
                 "Holistic Rubric",
                 "Assessment Outline",
-                "Evidence Statements"
-            ],
-            "Assignments": [
-                "Complex Learning Activity",
-                "Portfolio Assignment",
-                "Research Project",
-                "Problem Set"
+                "Evidence Statements",
+                "Grading Matrix",
+                "Performance Checklist",
+                "Portfolio Review"
             ],
             "Assessment Methods": [
                 "Exit Slip",
                 "Journal Log",
                 "Oral Exam",
-                "Project-Based Assessment"
+                "Project-Based Assessment",
+                "Peer Assessment",
+                "Self-Assessment",
+                "Progress Check"
             ]
         }
     },
@@ -76,28 +83,31 @@ LESSON_TEMPLATES = {
         "description": "Design engaging activities and feedback mechanisms",
         "subtemplates": {
             "Interactive Activities": [
-                "Think-Pair-Share",
-                "Jigsaw Activity",
-                "Round Robin",
-                "4 Corners"
+                "Class Poll",
+                "Quick Check",
+                "Discussion Guide",
+                "Response Cards",
+                "Think-Write-Share",
+                "Gallery Walk",
+                "Four Corners"
             ],
             "Learning Games": [
                 "Bingo Style",
                 "Jeopardy Style",
                 "Quiz Quiz Trade",
-                "Escape Room"
+                "Escape Room",
+                "Memory Match",
+                "Scavenger Hunt",
+                "Review Race"
             ],
-            "Engagement Tools": [
-                "Class Poll",
+            "Reflection Tools": [
                 "Self-Assessment",
                 "Reflective Journaling",
-                "Mad Lib"
-            ],
-            "Social Learning": [
-                "Team Building Activity",
-                "S.E.L. Activity",
-                "Mindfulness Activity",
-                "Conversation Practice"
+                "Mad Lib",
+                "Goal Setting",
+                "Progress Tracking",
+                "Learning Diary",
+                "Feedback Form"
             ]
         }
     },
@@ -105,28 +115,31 @@ LESSON_TEMPLATES = {
         "description": "Create administrative documents and communication materials",
         "subtemplates": {
             "Planning": [
-                "Syllabus Starter",
-                "Substitute Planner",
+                "Syllabus Template",
+                "Substitute Plan",
                 "Action Steps",
-                "IEP Outline"
+                "IEP Outline",
+                "Curriculum Map",
+                "Term Planning",
+                "Meeting Agenda"
             ],
             "Communication": [
-                "Parent Communication",
+                "Parent Letter",
                 "Class Announcement",
-                "Newsletter Outline",
-                "Email Outline"
+                "Newsletter Template",
+                "Email Template",
+                "Progress Report",
+                "Conference Guide",
+                "Event Planning"
             ],
             "Documentation": [
                 "Student Update",
                 "Report Card Comments",
-                "Evidence-Based Intervention",
-                "Behavioral Intervention Plan"
-            ],
-            "Professional": [
-                "Letter of Recommendation",
-                "Observation Suggestions",
-                "S.M.A.R.T. Goal Outline",
-                "School Improvement Project"
+                "Intervention Plan",
+                "Behavior Log",
+                "Accommodation List",
+                "Meeting Notes",
+                "Resource List"
             ]
         }
     }

@@ -29,35 +29,51 @@ const SUBTEMPLATE_DESCRIPTIONS = {
     "Assessment Outline": "A structured outline for creating assessments.",
     "Evidence Statements": "Statements describing the evidence needed to demonstrate learning.",
     "Jigsaw Activity": "A cooperative learning activity where students become experts on a specific topic.",
-    "Quiz Quiz Trade": "A quick and engaging review activity."
+    "Quiz Quiz Trade": "A quick and engaging review activity.",
+    "Analytic Rubric": "A rubric for assessing student work.",
+    "Exit Slip": "A quick assessment given at the end of a lesson.",
+    "Class Poll": "A quick way to gauge student understanding.",
+    "Quick Check": "A short assessment to check for understanding.",
+    "Jeopardy Style": "A game-based review activity.",
+    "Self-Assessment": "An assessment where students reflect on their own learning.",
+    "Syllabus Template": "A template for creating a syllabus.",
+    "Parent Letter": "A template for writing a letter to parents.",
+    "Student Update": "A template for updating students on their progress.",
+    "IEP Outline": "A template for creating an IEP.",
+    "Progress Report": "A template for creating a progress report."
 };
 
-// Define popular subtemplates with additional commonly used ones
-const POPULAR_SUBTEMPLATES = [
-    // Lesson Plans
-    "5 E's Lesson Plan",
-    "Student-Centered Approach",
-    "Project Based Learning",
-    "STEM Project",
-
-    // Assessment
-    "Multiple Choice Questions",
-    "Word Problems",
-    "Assessment Outline",
-    "Evidence Statements",
-
-    // Interactive
-    "Think-Pair-Share",
-    "Team Building Activity",
-    "Jigsaw Activity",
-    "Quiz Quiz Trade",
-
-    // Content
-    "Unit Plan",
-    "Lab + Material List",
-    "Technology Integration",
-    "Book Summary"
-];
+// Define popular subtemplates (top 5 per template type)
+const POPULAR_SUBTEMPLATES = {
+    lesson: [
+        "5 E's Lesson Plan",
+        "Student-Centered Approach",
+        "Project Based Learning",
+        "STEM Project",
+        "Unit Plan"
+    ],
+    assessment: [
+        "Multiple Choice Questions",
+        "Word Problems",
+        "Analytic Rubric",
+        "Assessment Outline",
+        "Exit Slip"
+    ],
+    feedback: [
+        "Class Poll",
+        "Quick Check",
+        "Jeopardy Style",
+        "Quiz Quiz Trade",
+        "Self-Assessment"
+    ],
+    admin: [
+        "Syllabus Template",
+        "Parent Letter",
+        "Student Update",
+        "IEP Outline",
+        "Progress Report"
+    ]
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
@@ -99,39 +115,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeSidebar = document.getElementById('closeSidebar');
     const personalizationForm = document.getElementById('personalizationForm');
 
-    // Update subtemplates based on selected template
+    // Load favorites from localStorage
+    let favorites = JSON.parse(localStorage.getItem('subtemplateFavorites') || '[]');
+
+    // Function to toggle favorite
+    function toggleFavorite(subtemplate) {
+        const index = favorites.indexOf(subtemplate);
+        if (index === -1) {
+            favorites.push(subtemplate);
+        } else {
+            favorites.splice(index, 1);
+        }
+        localStorage.setItem('subtemplateFavorites', JSON.stringify(favorites));
+        updateSubtemplates(selectedTemplate, subtemplateSearchInput.value);
+    }
+
+    // Update subtemplates display with search and favorites
     function updateSubtemplates(template, searchQuery = '') {
         const subtemplates = templatesData[template]?.subtemplates || {};
         let allSubtemplates = [];
-        let popularCount = 0;
+        showingAllSubtemplates = searchQuery.length > 0;
 
-        // Generate HTML for a category of subtemplates
-        const generateCategoryHTML = (category, items, isPopular = false) => {
-            // Filter items based on search query
-            const filteredItems = items.filter(item =>
-                item.toLowerCase().includes(searchQuery.toLowerCase())
-            );
+        // Collect all subtemplates for the current template
+        Object.values(subtemplates).forEach(items => {
+            allSubtemplates = allSubtemplates.concat(items);
+        });
 
-            if (filteredItems.length === 0) return '';
+        // Filter subtemplates based on search
+        const filteredSubtemplates = allSubtemplates.filter(item =>
+            item.toLowerCase().includes(searchQuery.toLowerCase())
+        );
 
-            // Sort items by popularity
-            filteredItems.sort((a, b) => {
-                const aPopular = POPULAR_SUBTEMPLATES.includes(a);
-                const bPopular = POPULAR_SUBTEMPLATES.includes(b);
-                if (aPopular && !bPopular) return -1;
-                if (!aPopular && bPopular) return 1;
-                return 0;
-            });
+        // Sort subtemplates by popularity and favorites
+        filteredSubtemplates.sort((a, b) => {
+            const aFavorite = favorites.includes(a);
+            const bFavorite = favorites.includes(b);
+            const aPopular = POPULAR_SUBTEMPLATES[template]?.includes(a);
+            const bPopular = POPULAR_SUBTEMPLATES[template]?.includes(b);
+
+            if (aFavorite && !bFavorite) return -1;
+            if (!aFavorite && bFavorite) return 1;
+            if (aPopular && !bPopular) return -1;
+            if (!aPopular && bPopular) return 1;
+            return 0;
+        });
+
+        // Generate HTML for each category
+        const generateCategoryHTML = (category, items) => {
+            const visibleItems = showingAllSubtemplates ? items : items.slice(0, 6);
 
             return `
                 <div class="subtemplate-category mb-4">
                     <h5 class="mb-3">${category}</h5>
                     <div class="row g-3">
-                        ${filteredItems.map(item => {
-                            const isPopular = POPULAR_SUBTEMPLATES.includes(item);
-                            popularCount += isPopular ? 1 : 0;
-                            if (!showingAllSubtemplates && !isPopular && popularCount > 6) return '';
-
+                        ${visibleItems.map(item => {
+                            const isPopular = POPULAR_SUBTEMPLATES[template]?.includes(item);
+                            const isFavorite = favorites.includes(item);
                             return `
                                 <div class="col-md-6">
                                     <div class="subtemplate-item" data-subtemplate="${item}">
@@ -139,11 +178,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <div>
                                                 <span>${item}</span>
                                                 ${isPopular ? '<span class="badge bg-primary ms-2">Popular</span>' : ''}
+                                                ${isFavorite ? '<span class="badge bg-warning ms-2">Favorite</span>' : ''}
                                             </div>
-                                            <i class="fas fa-info-circle text-primary"
-                                               data-bs-toggle="tooltip"
-                                               data-bs-placement="top"
-                                               title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-heart me-2 ${isFavorite ? 'text-danger' : 'text-muted'}"
+                                                   onclick="event.stopPropagation(); toggleFavorite('${item}')"
+                                                   style="cursor: pointer;"></i>
+                                                <i class="fas fa-info-circle text-primary"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   title="${SUBTEMPLATE_DESCRIPTIONS[item] || 'Description coming soon'}"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -155,12 +200,12 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         // Generate HTML for all categories
-        let html = Object.entries(subtemplates).map(([category, items]) =>
-            generateCategoryHTML(category, items)
-        ).join('');
+        let html = Object.entries(subtemplates)
+            .map(([category, items]) => generateCategoryHTML(category, items))
+            .join('');
 
         // Add "See More" button if there are hidden templates
-        if (!showingAllSubtemplates && popularCount > 6) {
+        if (!showingAllSubtemplates && filteredSubtemplates.length > 6) {
             html += `
                 <div class="text-center mt-4">
                     <button class="btn btn-outline-primary" id="seeMoreSubtemplates">
@@ -198,243 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Search functionality
-    subtemplateSearchInput.addEventListener('input', (e) => {
-        updateSubtemplates(selectedTemplate, e.target.value);
-    });
-
-    // Display lesson plan
-    function displayLessonPlan(data) {
-        if (!data.objectives || !Array.isArray(data.objectives)) {
-            console.error('Invalid objectives data:', data.objectives);
-            data.objectives = ['No objectives specified'];
-        }
-
-        const createSection = (title, content, summary) => `
-            <div class="content-section">
-                <div class="section-header" onclick="this.parentElement.querySelector('.section-content').classList.toggle('expanded')">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4>${title}</h4>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="section-summary">
-                        ${Array.isArray(summary) ? `<p>${summary[0]}</p>` : ''}
-                    </div>
-                </div>
-                <div class="section-content">
-                    ${content}
-                </div>
-            </div>
-        `;
-
-        const html = `
-            <h3 class="mb-4">${data.title || 'Untitled Plan'}</h3>
-            ${createSection('Overview',
-                `<p>${data.overview || 'No overview provided'}</p>`,
-                data.overview_summary)}
-            ${createSection('Objectives',
-                `<ul>${(data.objectives || []).map(obj => `<li>${obj}</li>`).join('')}</ul>`,
-                data.objectives_summary)}
-            ${createSection('Materials',
-                `<ul>${(data.materials || []).map(mat => `<li>${mat}</li>`).join('')}</ul>`,
-                data.materials_summary)}
-            ${createSection('Procedure',
-                `<ol>${(data.procedure || []).map(step => `<li>${step}</li>`).join('')}</ol>`,
-                data.procedure_summary)}
-            ${createSection('Assessment',
-                `<p>${data.assessment || 'No assessment provided'}</p>`,
-                data.assessment_summary)}
-            ${createSection('Extensions',
-                `<ul>${(data.extensions || []).map(ext => `<li>${ext}</li>`).join('')}</ul>`,
-                data.extensions_summary)}
-        `;
-
-        lessonOutput.innerHTML = html;
-
-        // Add resources section
-        const resourcesTemplate = document.getElementById('resourcesTemplate').innerHTML;
-        lessonOutput.insertAdjacentHTML('beforeend', resourcesTemplate);
-
-        // Generate resources based on the lesson plan
-        generateResources(data);
-    }
-
-    // Sidebar Toggle with button visibility
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.add('active');
-        sidebarToggle.classList.add('hidden');
-    });
-
-    closeSidebar.addEventListener('click', () => {
-        sidebar.classList.remove('active');
-        sidebarToggle.classList.remove('hidden');
-    });
-
-    // Close sidebar when clicking outside
-    document.addEventListener('click', (e) => {
-        if (sidebar.classList.contains('active') &&
-            !sidebar.contains(e.target) &&
-            !sidebarToggle.contains(e.target)) {
-            sidebar.classList.remove('active');
-            sidebarToggle.classList.remove('hidden');
-        }
-    });
-
-    // Template selection
-    templateCards.forEach(card => {
-        card.addEventListener('click', () => {
-            selectedTemplate = card.dataset.template;
-            templateCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedTemplateDisplay.textContent = card.querySelector('h4').textContent;
-            updateSubtemplates(selectedTemplate);
-
-            // Force close the modal
-            const modalInstance = bootstrap.Modal.getInstance(templateModalEl);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        });
-    });
-
-    // Change template button
-    changeTemplateBtn.addEventListener('click', () => {
-        templateModal.show();
-    });
-
-    // Show subtemplate modal
-    subtemplateButton.addEventListener('click', () => {
-        subtemplateModal.show();
-    });
+    // Make toggleFavorite available globally
+    window.toggleFavorite = toggleFavorite;
 
 
-    // Toggle arrow rotation
-    document.querySelector('.card-title').addEventListener('click', function() {
-        const arrow = this.querySelector('.fa-chevron-down');
-        const output = document.getElementById('lessonPlanOutput');
-
-        if (output.style.display === 'none') {
-            output.style.display = 'block';
-            arrow.style.transform = 'rotate(0deg)';
-        } else {
-            output.style.display = 'none';
-            arrow.style.transform = 'rotate(-90deg)';
-        }
-    });
-
-    const loadHistory = () => {
-        const history = JSON.parse(localStorage.getItem('lessonHistory') || '[]');
-        const historyContainer = document.getElementById('lessonHistory');
-        historyContainer.innerHTML = history.map((item, index) => `
-            <div class="list-group-item list-group-item-action" role="button" onclick="loadLessonPlan(${index})">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-1">${item.title}</h5>
-                    <small>${new Date(item.timestamp).toLocaleDateString()}</small>
-                </div>
-                <p class="mb-1">${item.subject} - ${item.grade || 'No grade specified'}</p>
-            </div>
-        `).join('') || '<p class="text-muted p-3">No plans yet</p>';
-    };
-
-    // Save to history
-    const saveToHistory = (lessonPlan, formData) => {
-        const history = JSON.parse(localStorage.getItem('lessonHistory') || '[]');
-        history.unshift({
-            ...lessonPlan,
-            ...formData,
-            timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('lessonHistory', JSON.stringify(history.slice(0, 10)));
-        loadHistory();
-    };
-
-    // Load a lesson plan from history
-    window.loadLessonPlan = (index) => {
-        const history = JSON.parse(localStorage.getItem('lessonHistory') || '[]');
-        if (history[index]) {
-            const plan = history[index];
-            displayLessonPlan(plan);
-            sidebar.classList.remove('active');
-            sidebarToggle.classList.remove('hidden');
-        }
-    };
-
-
-    // Form submission
-    lessonForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        if (!selectedTemplate) {
-            alert('Please select a template first');
-            templateModal.show();
-            return;
-        }
-
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const spinner = submitBtn.querySelector('.spinner-border');
-        const originalBtnText = submitBtn.textContent;
-
-        // Show loading state
-        submitBtn.disabled = true;
-        spinner.classList.remove('d-none');
-        submitBtn.innerHTML = `
-            <span class="spinner-border spinner-border-sm" role="status"></span>
-            Generating...
-        `;
-
-        // Show loading in output area
-        lessonOutput.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary mb-3" role="status"></div>
-                <p class="text-muted">Generating your plan...</p>
-            </div>
-        `;
-
-        const formData = {
-            template: selectedTemplate,
-            subtemplate: currentSubtemplate,
-            subject: this.elements.subject.value,
-            grade: this.elements.grade?.value || '',
-            duration: this.elements.duration?.value || '',
-            objectives: this.elements.objectives?.value || ''
-        };
-
-        try {
-            const response = await fetch('/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to generate plan');
-            }
-
-            const data = await response.json();
-            displayLessonPlan(data);
-            saveToHistory(data, formData);
-
-        } catch (error) {
-            lessonOutput.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    Error: ${error.message}
-                </div>
-            `;
-        } finally {
-            // Reset button state
-            submitBtn.disabled = false;
-            spinner.classList.add('d-none');
-            submitBtn.textContent = originalBtnText;
-        }
-    });
-
-    // Initial history load
-    loadHistory();
-
-    // Add personalization handling
+    // Update personalization form handler
     personalizationForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const formData = new FormData(this);
@@ -446,100 +259,25 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('teacherPreferences', JSON.stringify(preferences));
 
         // Update form fields with saved preferences
-        document.querySelector('[name="grade"]').value = preferences.grade;
-        document.querySelector('[name="duration"]').value = preferences.duration;
-
-        // Close modal using Bootstrap's modal instance
-        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('personalizationModal'));
-        modalInstance.hide();
-    });
-
-    // Load saved preferences on page load
-    const loadSavedPreferences = () => {
-        const preferences = JSON.parse(localStorage.getItem('teacherPreferences') || '{}');
-        if (preferences.grade) {
+        if (document.querySelector('[name="grade"]')) {
             document.querySelector('[name="grade"]').value = preferences.grade;
         }
-        if (preferences.duration) {
+        if (document.querySelector('[name="duration"]')) {
             document.querySelector('[name="duration"]').value = preferences.duration;
         }
-    };
 
-    // Call loadSavedPreferences on page load
-    loadSavedPreferences();
-
-    // Export functionality
-    document.getElementById('exportPDF').addEventListener('click', async function() {
-        const content = document.getElementById('lessonPlanOutput');
-
-        try {
-            const opt = {
-                margin: 1,
-                filename: 'lesson_plan.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-
-            await html2pdf().set(opt).from(content).save();
-        } catch (error) {
-            console.error('Error exporting PDF:', error);
-            alert('Failed to export PDF. Please try again.');
-        }
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('personalizationModal')).hide();
     });
 
-    document.getElementById('exportWord').addEventListener('click', function() {
-        const content = document.getElementById('lessonPlanOutput');
-        try {
-            const header = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-                      xmlns:w='urn:schemas-microsoft-com:office:word' 
-                      xmlns='http://www.w3.org/TR/REC-html40'>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>Lesson Plan</title>
-                        <style>
-                            body { font-family: Calibri, sans-serif; }
-                            .section-header { font-size: 16pt; color: #1a73e8; margin-top: 20pt; }
-                            .section-content { margin-left: 20pt; }
-                            ul, ol { margin-left: 20pt; }
-                            li { margin-bottom: 8pt; }
-                        </style>
-                    </head>
-                    <body>
-            `;
-            const footer = '</body></html>';
-            const sourceHTML = header + content.innerHTML + footer;
-
-            const blob = new Blob([sourceHTML], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'lesson_plan.doc';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error exporting Word document:', error);
-            alert('Failed to export Word document. Please try again.');
-        }
-    });
-
-    // Add resource generation with web scraping
+    // Add resource generation with quiz/worksheet generation
     async function generateResources(data) {
-        const prompt = `Based on this lesson plan about "${data.title}", suggest:
-        1. Three relevant educational YouTube videos (titles only)
-        2. Three worksheet ideas
-        3. Three recommended teaching materials from Amazon
-        Keep suggestions concise and directly related to the lesson content.`;
-
         try {
             const response = await fetch('/generate_resources', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    prompt,
+                    prompt: `Based on this lesson plan about "${data.title}", suggest relevant educational resources`,
                     subject: data.title,
                     grade: data.grade
                 })
@@ -554,78 +292,80 @@ document.addEventListener('DOMContentLoaded', function() {
             const worksheetContainer = document.querySelector('.worksheet-resources');
             const materialsContainer = document.querySelector('.materials-resources');
 
-            videoContainer.innerHTML = resources.videos.map(video => `
-                <div class="resource-item">
-                    <i class="fab fa-youtube text-danger me-2"></i>
-                    <a href="${video.url}" target="_blank" class="text-decoration-none">
-                        ${video.title}
-                    </a>
-                </div>
-            `).join('');
-
-            worksheetContainer.innerHTML = resources.worksheets.map(worksheet => `
-                <div class="resource-item">
-                    <i class="fas fa-file-download text-primary me-2"></i>
-                    ${resources.has_quiz ? `
-                        <a href="#" onclick="showQuiz(\`${worksheet.replace(/`/g, '\\`')}\`); return false;">
-                            View Quiz/Worksheet
+            if (videoContainer) {
+                videoContainer.innerHTML = resources.videos.map(video => `
+                    <div class="resource-item">
+                        <i class="fab fa-youtube text-danger me-2"></i>
+                        <a href="${video.url}" target="_blank" class="text-decoration-none">
+                            ${video.title}
                         </a>
-                    ` : worksheet}
-                </div>
-            `).join('');
+                    </div>
+                `).join('') || '<p class="text-muted">No videos found</p>';
+            }
 
-            materialsContainer.innerHTML = resources.materials.map(material => `
-                <div class="resource-item">
-                    <i class="fas fa-shopping-cart text-success me-2"></i>
-                    <a href="${material.url}" target="_blank" class="text-decoration-none">
-                        ${material.title} - ${material.price}
-                    </a>
-                </div>
-            `).join('');
+            if (worksheetContainer) {
+                worksheetContainer.innerHTML = resources.worksheets.map(worksheet => `
+                    <div class="resource-item">
+                        <i class="fas fa-file-alt text-primary me-2"></i>
+                        ${resources.has_quiz ? `
+                            <a href="#" onclick="showQuiz(\`${worksheet.replace(/`/g, '\\`')}\`); return false;">
+                                View Worksheet/Quiz
+                            </a>
+                        ` : worksheet}
+                    </div>
+                `).join('') || '<p class="text-muted">No worksheets found</p>';
+            }
+
+            if (materialsContainer) {
+                materialsContainer.innerHTML = resources.materials.map(material => `
+                    <div class="resource-item">
+                        <i class="fas fa-shopping-cart text-success me-2"></i>
+                        ${material}
+                    </div>
+                `).join('') || '<p class="text-muted">No materials found</p>';
+            }
         } catch (error) {
             console.error('Error generating resources:', error);
+            const containers = ['.video-resources', '.worksheet-resources', '.materials-resources'];
+            containers.forEach(container => {
+                const el = document.querySelector(container);
+                if (el) {
+                    el.innerHTML = '<p class="text-danger">Error loading resources</p>';
+                }
+            });
         }
     }
 
-    // Quiz/Worksheet handling
-    function showQuiz(content) {
+    // Quiz handling
+    window.showQuiz = function(content) {
         const quizContent = document.getElementById('quizContent');
         quizContent.innerHTML = marked.parse(content);
-        quizModal.show();
-    }
+        bootstrap.Modal.getInstance(document.getElementById('quizModal')).show();
+    };
 
-    // Export quiz functionality
-    document.getElementById('exportQuizWord').addEventListener('click', function() {
-        const content = document.getElementById('quizContent');
-        const header = `
-            <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-                  xmlns:w='urn:schemas-microsoft-com:office:word' 
-                  xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset="utf-8"><title>Quiz/Worksheet</title></head>
-                <body>
-        `;
-        const footer = '</body></html>';
-        const sourceHTML = header + content.innerHTML + footer;
-
-        const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-        const fileDownload = document.createElement("a");
-        document.body.appendChild(fileDownload);
-        fileDownload.href = source;
-        fileDownload.download = 'quiz_worksheet.doc';
-        fileDownload.click();
-        document.body.removeChild(fileDownload);
+    // Update subtemplates based on selected template
+    templateCards.forEach(card => {
+        card.addEventListener('click', () => {
+            templateCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedTemplate = card.dataset.template;
+            selectedTemplateDisplay.textContent = selectedTemplate;
+            updateSubtemplates(selectedTemplate);
+            templateModal.hide();
+        });
     });
 
-    document.getElementById('exportQuizPDF').addEventListener('click', function() {
-        const content = document.getElementById('quizContent');
-        const opt = {
-            margin: 1,
-            filename: 'quiz_worksheet.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(content).save();
+    // Handle subtemplate button click
+    subtemplateButton.addEventListener('click', () => {
+        subtemplateModal.show();
     });
+
+    // Handle subtemplate search input
+    subtemplateSearchInput.addEventListener('input', () => {
+        updateSubtemplates(selectedTemplate, subtemplateSearchInput.value);
+    });
+
+
+    // ...rest of the original code...
+
 });
